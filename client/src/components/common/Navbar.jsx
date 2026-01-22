@@ -90,6 +90,8 @@ const Navbar = () => {
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
+  // Search Logic
+  const [searchQuery, setSearchQuery] = useState("");
   /* Mobile Search State */
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
 
