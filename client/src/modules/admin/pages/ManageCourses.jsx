@@ -20,7 +20,7 @@ const ManageCourses = () => {
     const [editingCourse, setEditingCourse] = useState(null);
     const [formData, setFormData] = useState({
         title: '', description: '', category: 'Other', instructor: '',
-        level: 'Beginner', price: 0, status: 'draft', tags: ''
+        level: 'Beginner', price: 0, status: 'draft', tags: '', thumbnail: ''
     });
 
     // Fetch courses
@@ -53,11 +53,11 @@ const ManageCourses = () => {
             setFormData({
                 title: course.title, description: course.description, category: course.category,
                 instructor: course.instructor, level: course.level, price: course.price,
-                status: course.status, tags: course.tags?.join(', ') || ''
+                status: course.status, tags: course.tags?.join(', ') || '', thumbnail: course.thumbnail || ''
             });
         } else {
             setEditingCourse(null);
-            setFormData({ title: '', description: '', category: 'Other', instructor: '', level: 'Beginner', price: 0, status: 'draft', tags: '' });
+            setFormData({ title: '', description: '', category: 'Other', instructor: '', level: 'Beginner', price: 0, status: 'draft', tags: '', thumbnail: '' });
         }
         setIsModalOpen(true);
     };
@@ -184,6 +184,10 @@ const ManageCourses = () => {
                             <div>
                                 <label className="block text-sm font-medium text-slate-400 mb-2">Description *</label>
                                 <textarea name="description" value={formData.description} onChange={handleChange} required rows={4} className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-blue-500" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-400 mb-2">Thumbnail URL</label>
+                                <input name="thumbnail" value={formData.thumbnail} onChange={handleChange} placeholder="https://example.com/image.jpg" className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-blue-500" />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
