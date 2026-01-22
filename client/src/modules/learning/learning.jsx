@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Search, BookOpen, Star, Clock } from "lucide-react";
+import { Search, BookOpen, Star, Clock, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { getCourses } from "../../services/course.service";
 
 /* ✅ COURSE BANNER IMAGES (CAROUSEL) */
 const sliderImages = [
@@ -12,60 +13,67 @@ const sliderImages = [
   "https://images.unsplash.com/photo-1504384308090-c894fdcc538d",
 ];
 
-const categories = ["All", "Coding", "Aptitude", "Management", "Tools"];
-
-const courses = [
+// Fallback dummy course for cross-checking
+const FALLBACK_COURSES = [
   {
-    id: 1,
-    title: "Full Stack Web Development",
-    category: "Coding",
+    _id: 'dummy-1',
+    title: "Full Stack Web Development (Demo)",
+    category: "Web Development",
     level: "Beginner",
-    modules: 12,
     duration: "40 hrs",
-    progress: 0,
     rating: 4.7,
-    tag: "Popular",
-  },
-  {
-    id: 2,
-    title: "Data Structures & Algorithms",
-    category: "Coding",
-    level: "Advanced",
-    modules: 20,
-    duration: "35 hrs",
-    progress: 0,
-    rating: 4.9,
-    tag: "Top Rated",
-  },
-  {
-    id: 3,
-    title: "System Design",
-    category: "Coding",
-    level: "Intermediate",
-    modules: 8,
-    duration: "18 hrs",
-    progress: 0,
-    rating: 4.6,
-    tag: "New",
-  },
-  {
-    id: 4,
-    title: "Aptitude for Placements",
-    category: "Aptitude",
-    level: "Beginner",
-    modules: 10,
-    duration: "15 hrs",
-    progress: 0,
-    rating: 4.5,
-    tag: "Trending",
+    tags: ["React", "Node.js", "MongoDB"],
+    status: "published",
+    description: "This is a demo course to verify the integration works."
   },
 ];
 
+// Helper: Map backend data to display format
+const mapCourseData = (course) => ({
+  id: course._id,
+  title: course.title,
+  category: course.category || "Other",
+  level: course.level || "Beginner",
+  duration: course.duration || "N/A",
+  rating: course.rating || 0,
+  tags: course.tags || [],
+  thumbnail: course.thumbnail || null,
+  instructor: course.instructor || null,
+  description: course.description,
+});
+
 const Learning = () => {
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [active, setActive] = useState("All");
   const [search, setSearch] = useState("");
   const [slide, setSlide] = useState(0);
   const navigate = useNavigate();
+
+  // Categories derived from backend data + static ones
+  const categories = ["All", "Web Development", "Mobile Development", "Data Science", "AI/ML", "DevOps", "Other"];
+
+  /* ===== FETCH COURSES FROM BACKEND ===== */
+  useEffect(() => {
+    const loadCourses = async () => {
+      setLoading(true);
+      try {
+        const data = await getCourses();
+        if (data && data.length > 0) {
+          setCourses(data.map(mapCourseData));
+        } else {
+          // Use fallback if no courses from backend
+          setCourses(FALLBACK_COURSES.map(mapCourseData));
+        }
+      } catch (error) {
+        console.error('Error loading courses:', error);
+        setCourses(FALLBACK_COURSES.map(mapCourseData));
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadCourses();
+  }, []);
 
   /* ===== IMAGE CAROUSEL ===== */
   useEffect(() => {
@@ -79,7 +87,7 @@ const Learning = () => {
   const placeholders = [
     "Search Full Stack...",
     "Search DSA Courses...",
-    "Search Aptitude...",
+    "Search AI/ML...",
     "Search Interview Skills...",
   ];
 
@@ -175,11 +183,10 @@ const Learning = () => {
             <button
               key={cat}
               onClick={() => setActive(cat)}
-              className={`px-6 py-2 rounded-full font-semibold transition ${
-                active === cat
-                  ? "bg-blue-600 text-white shadow-lg"
-                  : "bg-white border hover:bg-gray-100"
-              }`}
+              className={`px-6 py-2 rounded-full font-semibold transition ${active === cat
+                ? "bg-blue-600 text-white shadow-lg"
+                : "bg-white border hover:bg-gray-100"
+                }`}
             >
               {cat}
             </button>
@@ -191,44 +198,88 @@ const Learning = () => {
       <section className="max-w-7xl mx-auto px-6 pb-20">
         <h2 className="text-2xl font-bold mb-8">Recommended Courses</h2>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {filtered.map((c) => (
-            <div
-              key={c.id}
-              className="bg-white rounded-2xl p-6 shadow hover:shadow-2xl transition relative"
-            >
-              <span className="absolute top-4 right-4 text-xs px-3 py-1 rounded-full bg-blue-100 text-blue-700 font-semibold">
-                {c.tag}
-              </span>
-
-              <BookOpen className="text-blue-600" />
-
-              <h3 className="mt-4 font-bold text-lg">{c.title}</h3>
-
-              <p className="text-sm text-gray-500 mt-1">
-                {c.level} • {c.modules} Modules
-              </p>
-
-              <div className="flex justify-between text-sm text-gray-500 mt-2">
-                <span className="flex items-center gap-1">
-                  <Clock className="w-4 h-4" />
-                  {c.duration}
-                </span>
-                <span className="flex items-center gap-1 text-yellow-500">
-                  <Star className="w-4 h-4 fill-yellow-400" />
-                  {c.rating}
-                </span>
-              </div>
-
-              <button
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="animate-spin text-blue-600" size={40} />
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="text-center py-20 text-gray-500">
+            <p className="text-lg">No courses found.</p>
+            <p className="text-sm mt-2">Try adjusting your search or filters.</p>
+          </div>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filtered.map((c) => (
+              <div
+                key={c.id}
                 onClick={() => navigate(`/course/${c.id}`)}
-                className="mt-5 w-full py-2 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition font-semibold"
+                className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer group"
               >
-                Enroll Now
-              </button>
-            </div>
-          ))}
-        </div>
+                {/* Course Thumbnail */}
+                <div className="relative h-40 overflow-hidden">
+                  {c.thumbnail ? (
+                    <img
+                      src={c.thumbnail}
+                      alt={c.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                      <BookOpen className="text-white/60" size={48} />
+                    </div>
+                  )}
+                  {/* Category Badge */}
+                  <span className="absolute top-3 left-3 text-xs px-3 py-1 rounded-full bg-white/90 text-blue-700 font-semibold shadow">
+                    {c.category}
+                  </span>
+                  {/* Level Badge */}
+                  <span className="absolute top-3 right-3 text-xs px-2 py-1 rounded-full bg-black/50 text-white font-medium">
+                    {c.level}
+                  </span>
+                </div>
+
+                {/* Course Info */}
+                <div className="p-5">
+                  <h3 className="font-bold text-gray-900 text-lg line-clamp-2 group-hover:text-blue-600 transition-colors">
+                    {c.title}
+                  </h3>
+
+                  {c.instructor && (
+                    <p className="text-sm text-gray-500 mt-1">by {c.instructor}</p>
+                  )}
+
+                  <div className="flex justify-between items-center text-sm text-gray-500 mt-3 pt-3 border-t border-gray-100">
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-4 h-4" />
+                      {c.duration || 'Self-paced'}
+                    </span>
+                    <span className="flex items-center gap-1 text-yellow-500">
+                      <Star className="w-4 h-4 fill-yellow-400" />
+                      {c.rating > 0 ? c.rating.toFixed(1) : 'New'}
+                    </span>
+                  </div>
+
+                  {/* Tags */}
+                  {c.tags && c.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-3">
+                      {c.tags.slice(0, 3).map((tag, i) => (
+                        <span key={i} className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  <button
+                    className="mt-4 w-full py-2.5 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition font-semibold text-sm"
+                  >
+                    View Course
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );

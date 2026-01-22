@@ -5,6 +5,7 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // 1. Check Session on Load (The "Persist" Logic)
@@ -25,7 +26,7 @@ export const AuthProvider = ({ children }) => {
         } else {
           // Token Valid -> Restore Session
           setUser(JSON.parse(storedUser));
-          // Optional: You could verify the token with the backend here for extra security
+          setToken(storedToken);
         }
       } catch (error) {
         // Token invalid/corrupted -> Force Logout
@@ -36,12 +37,13 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   // 2. Login Action
-  const loginUser = (userData, token) => {
+  const loginUser = (userData, authToken) => {
     // Save to State
     setUser(userData);
-    
+    setToken(authToken);
+
     // Save to Browser Storage (Persistence)
-    localStorage.setItem('authToken', token);
+    localStorage.setItem('authToken', authToken);
     localStorage.setItem('authUser', JSON.stringify(userData));
   };
 
@@ -49,17 +51,15 @@ export const AuthProvider = ({ children }) => {
   const logoutUser = () => {
     // Clear State
     setUser(null);
-    
+    setToken(null);
+
     // Clear Storage
     localStorage.removeItem('authToken');
     localStorage.removeItem('authUser');
-    
-    // Optional: Redirect to login if needed
-    // window.location.href = '/login'; 
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, loginUser, logoutUser }}>
+    <AuthContext.Provider value={{ user, token, loading, loginUser, logoutUser }}>
       {!loading && children}
     </AuthContext.Provider>
   );

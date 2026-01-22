@@ -21,6 +21,9 @@ app.use(morgan('dev'));  // Logging
 
 // --- ROUTES ---
 app.use('/api/auth', require('./modules/auth/auth.routes'));
+app.use('/api/courses', require('./modules/learning/course.routes'));
+app.use('/api/events', require('./modules/competition/event.routes'));
+app.use('/api/enrollments', require('./modules/learning/enrollment.routes'));
 
 // Example of a Protected Route (For Testing)
 // We will move this to a proper module later
