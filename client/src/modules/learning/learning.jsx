@@ -13,10 +13,10 @@ const sliderImages = [
   "https://images.unsplash.com/photo-1504384308090-c894fdcc538d",
 ];
 
-// Fallback dummy course for cross-checking
+// Fallback dummy course
 const FALLBACK_COURSES = [
   {
-    _id: 'dummy-1',
+    _id: "dummy-1",
     title: "Full Stack Web Development (Demo)",
     category: "Web Development",
     level: "Beginner",
@@ -24,11 +24,10 @@ const FALLBACK_COURSES = [
     rating: 4.7,
     tags: ["React", "Node.js", "MongoDB"],
     status: "published",
-    description: "This is a demo course to verify the integration works."
+    description: "This is a demo course to verify the integration works.",
   },
 ];
 
-// Helper: Map backend data to display format
 const mapCourseData = (course) => ({
   id: course._id,
   title: course.title,
@@ -50,10 +49,17 @@ const Learning = () => {
   const [slide, setSlide] = useState(0);
   const navigate = useNavigate();
 
-  // Categories derived from backend data + static ones
-  const categories = ["All", "Web Development", "Mobile Development", "Data Science", "AI/ML", "DevOps", "Other"];
+  const categories = [
+    "All",
+    "Web Development",
+    "Mobile Development",
+    "Data Science",
+    "AI/ML",
+    "DevOps",
+    "Other",
+  ];
 
-  /* ===== FETCH COURSES FROM BACKEND ===== */
+  /* ===== FETCH COURSES ===== */
   useEffect(() => {
     const loadCourses = async () => {
       setLoading(true);
@@ -62,11 +68,10 @@ const Learning = () => {
         if (data && data.length > 0) {
           setCourses(data.map(mapCourseData));
         } else {
-          // Use fallback if no courses from backend
           setCourses(FALLBACK_COURSES.map(mapCourseData));
         }
       } catch (error) {
-        console.error('Error loading courses:', error);
+        console.error("Error loading courses:", error);
         setCourses(FALLBACK_COURSES.map(mapCourseData));
       } finally {
         setLoading(false);
@@ -117,37 +122,14 @@ const Learning = () => {
   const filtered = courses.filter(
     (c) =>
       (active === "All" || c.category === active) &&
-      c.title.toLowerCase().includes(search.toLowerCase()),
+      c.title.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
     <div className="bg-slate-50 min-h-screen">
-      {/* ===== HERO WITH ANIMATED GRADIENT CAROUSEL ===== */}
-      <section className="relative overflow-hidden text-white">
-        {/* Animated Gradient Backgrounds */}
-        {[
-          "from-blue-600 via-indigo-600 to-purple-600",
-          "from-indigo-600 via-purple-600 to-blue-600",
-          "from-purple-600 via-blue-600 to-indigo-600",
-          "from-blue-700 via-cyan-600 to-indigo-600",
-        ].map((gradient, index) => (
-          <div
-            key={index}
-            className={`absolute inset-0 bg-gradient-to-r ${gradient} transition-opacity duration-1000 ease-in-out ${index === slide % 4 ? 'opacity-100' : 'opacity-0'
-              }`}
-          />
-        ))}
-
-        {/* Animated Orbs */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-[-20%] left-[10%] w-[400px] h-[400px] bg-white/10 rounded-full blur-[100px] animate-pulse"></div>
-          <div className="absolute bottom-[-10%] right-[10%] w-[400px] h-[400px] bg-indigo-300/20 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '1s' }}></div>
-          <div className="absolute top-[50%] left-[50%] w-[300px] h-[300px] bg-purple-300/10 rounded-full blur-[80px] animate-pulse" style={{ animationDelay: '2s' }}></div>
-        </div>
-
-        {/* Content */}
-        <div className="relative z-10 max-w-7xl mx-auto px-6 py-14 grid md:grid-cols-2 gap-10 items-center">
-          {/* TEXT SIDE */}
+      {/* ===== HERO ===== */}
+      <section className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+        <div className="max-w-7xl mx-auto px-6 py-14 grid md:grid-cols-2 gap-10 items-center">
           <div>
             <h1 className="text-4xl md:text-5xl font-extrabold drop-shadow-lg">
               Upgrade Your Skills 🚀
@@ -156,15 +138,14 @@ const Learning = () => {
               Learn industry‑ready skills and compete in real hackathons.
             </p>
 
-            {/* ✅ ANIMATED SEARCH BAR */}
             <div className="mt-6 relative max-w-md">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={typedText}
-                className="w-full pl-12 pr-4 py-3 rounded-full 
-                bg-white/90 backdrop-blur 
+                className="w-full pl-12 pr-4 py-3 rounded-full
+                bg-white/90 backdrop-blur
                 text-gray-800 placeholder-gray-500
                 outline-none border border-white/40
                 shadow-lg
@@ -174,7 +155,7 @@ const Learning = () => {
             </div>
           </div>
 
-          {/* IMAGE CAROUSEL */}
+          {/* Carousel */}
           <div className="relative overflow-hidden rounded-2xl shadow-2xl h-[260px]">
             <div
               className="flex h-full transition-transform duration-700"
@@ -190,7 +171,7 @@ const Learning = () => {
               ))}
             </div>
 
-            <div className="absolute inset-0 bg-black/30" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
             <div className="absolute bottom-4 left-4 text-sm font-semibold">
               Featured Learning Tracks
             </div>
@@ -205,10 +186,11 @@ const Learning = () => {
             <button
               key={cat}
               onClick={() => setActive(cat)}
-              className={`px-6 py-2 rounded-full font-semibold transition ${active === cat
-                ? "bg-blue-600 text-white shadow-lg"
-                : "bg-white border hover:bg-gray-100"
-                }`}
+              className={`px-6 py-2 rounded-full font-semibold transition ${
+                active === cat
+                  ? "bg-blue-600 text-white shadow-lg"
+                  : "bg-white border hover:bg-gray-100"
+              }`}
             >
               {cat}
             </button>
@@ -230,62 +212,74 @@ const Learning = () => {
             <p className="text-sm mt-2">Try adjusting your search or filters.</p>
           </div>
         ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {filtered.map((c) => (
               <div
                 key={c.id}
                 onClick={() => navigate(`/course/${c.id}`)}
-                className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer group"
+                className="
+                bg-white rounded-2xl overflow-hidden
+                shadow-md cursor-pointer group
+                transition-all duration-300
+                hover:-translate-y-3 hover:shadow-2xl hover:shadow-blue-500/20"
               >
-                {/* Course Thumbnail */}
-                <div className="relative h-40 overflow-hidden">
+                {/* Image */}
+                <div className="relative h-44 overflow-hidden">
                   {c.thumbnail ? (
                     <img
                       src={c.thumbnail}
                       alt={c.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-cover
+                      group-hover:scale-110 transition-transform duration-500"
                     />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-                      <BookOpen className="text-white/60" size={48} />
+                      <BookOpen className="text-white/70" size={48} />
                     </div>
                   )}
-                  {/* Category Badge */}
+
+                  {/* Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition" />
+
                   <span className="absolute top-3 left-3 text-xs px-3 py-1 rounded-full bg-white/90 text-blue-700 font-semibold shadow">
                     {c.category}
                   </span>
-                  {/* Level Badge */}
-                  <span className="absolute top-3 right-3 text-xs px-2 py-1 rounded-full bg-black/50 text-white font-medium">
+
+                  <span className="absolute top-3 right-3 text-xs px-2 py-1 rounded-full bg-black/60 text-white font-medium">
                     {c.level}
                   </span>
                 </div>
 
-                {/* Course Info */}
+                {/* Info */}
                 <div className="p-5">
                   <h3 className="font-bold text-gray-900 text-lg line-clamp-2 group-hover:text-blue-600 transition-colors">
                     {c.title}
                   </h3>
 
                   {c.instructor && (
-                    <p className="text-sm text-gray-500 mt-1">by {c.instructor}</p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      by {c.instructor}
+                    </p>
                   )}
 
                   <div className="flex justify-between items-center text-sm text-gray-500 mt-3 pt-3 border-t border-gray-100">
                     <span className="flex items-center gap-1">
                       <Clock className="w-4 h-4" />
-                      {c.duration || 'Self-paced'}
+                      {c.duration || "Self-paced"}
                     </span>
                     <span className="flex items-center gap-1 text-yellow-500">
                       <Star className="w-4 h-4 fill-yellow-400" />
-                      {c.rating > 0 ? c.rating.toFixed(1) : 'New'}
+                      {c.rating > 0 ? c.rating.toFixed(1) : "New"}
                     </span>
                   </div>
 
-                  {/* Tags */}
                   {c.tags && c.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-3">
                       {c.tags.slice(0, 3).map((tag, i) => (
-                        <span key={i} className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded">
+                        <span
+                          key={i}
+                          className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded"
+                        >
                           {tag}
                         </span>
                       ))}
@@ -293,7 +287,11 @@ const Learning = () => {
                   )}
 
                   <button
-                    className="mt-4 w-full py-2.5 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition font-semibold text-sm"
+                    className="
+                    mt-5 w-full py-2.5 rounded-xl
+                    bg-blue-600 text-white font-semibold text-sm
+                    hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-600/30
+                    transition-all duration-300"
                   >
                     View Course
                   </button>
