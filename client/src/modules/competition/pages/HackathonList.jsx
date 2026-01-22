@@ -159,12 +159,27 @@ const HackathonList = () => {
                                     )}
 
                                     <div className="flex justify-between items-start relative z-10 p-4">
-                                        <span className={`px-3 py-1 rounded-full text-xs font-bold backdrop-blur-md border border-white/20 shadow-lg capitalize ${hackathon.status === 'live' ? 'bg-red-500/80 text-white animate-pulse' :
-                                                hackathon.status === 'upcoming' ? 'bg-blue-500/80 text-white' : 'bg-slate-600/80 text-slate-200'
+                                        <span className={`px-3 py-1 rounded-full text-xs font-bold backdrop-blur-md border border-white/20 shadow-lg capitalize ${hackathon.status === 'live' ? 'bg-red-500/80 text-white' :
+                                            hackathon.status === 'upcoming' ? 'bg-blue-500/80 text-white' : 'bg-slate-600/80 text-slate-200'
                                             }`}>
                                             {hackathon.status}
                                         </span>
                                     </div>
+
+                                    {/* Live Indicator Dot - Bottom Right */}
+                                    {hackathon.status === 'live' && (
+                                        <div className="absolute bottom-3 right-3 z-20 flex items-center gap-2">
+                                            <span className="text-xs font-bold text-white uppercase tracking-wider drop-shadow-lg bg-red-500/90 px-2 py-0.5 rounded-full backdrop-blur-sm">
+                                                Live
+                                            </span>
+                                            <div className="relative flex items-center justify-center">
+                                                {/* Pulse Ring Animation */}
+                                                <span className="absolute inline-flex h-4 w-4 rounded-full bg-red-400 opacity-75 animate-ping"></span>
+                                                {/* Static Dot */}
+                                                <span className="relative inline-flex h-3 w-3 rounded-full bg-red-500 shadow-lg shadow-red-500/50"></span>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Content */}

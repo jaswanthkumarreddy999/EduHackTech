@@ -122,12 +122,34 @@ const Learning = () => {
 
   return (
     <div className="bg-slate-50 min-h-screen">
-      {/* ===== HERO WITH IMAGE CAROUSEL ===== */}
-      <section className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-        <div className="max-w-7xl mx-auto px-6 py-14 grid md:grid-cols-2 gap-10 items-center">
+      {/* ===== HERO WITH ANIMATED GRADIENT CAROUSEL ===== */}
+      <section className="relative overflow-hidden text-white">
+        {/* Animated Gradient Backgrounds */}
+        {[
+          "from-blue-600 via-indigo-600 to-purple-600",
+          "from-indigo-600 via-purple-600 to-blue-600",
+          "from-purple-600 via-blue-600 to-indigo-600",
+          "from-blue-700 via-cyan-600 to-indigo-600",
+        ].map((gradient, index) => (
+          <div
+            key={index}
+            className={`absolute inset-0 bg-gradient-to-r ${gradient} transition-opacity duration-1000 ease-in-out ${index === slide % 4 ? 'opacity-100' : 'opacity-0'
+              }`}
+          />
+        ))}
+
+        {/* Animated Orbs */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-[-20%] left-[10%] w-[400px] h-[400px] bg-white/10 rounded-full blur-[100px] animate-pulse"></div>
+          <div className="absolute bottom-[-10%] right-[10%] w-[400px] h-[400px] bg-indigo-300/20 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '1s' }}></div>
+          <div className="absolute top-[50%] left-[50%] w-[300px] h-[300px] bg-purple-300/10 rounded-full blur-[80px] animate-pulse" style={{ animationDelay: '2s' }}></div>
+        </div>
+
+        {/* Content */}
+        <div className="relative z-10 max-w-7xl mx-auto px-6 py-14 grid md:grid-cols-2 gap-10 items-center">
           {/* TEXT SIDE */}
           <div>
-            <h1 className="text-4xl md:text-5xl font-extrabold">
+            <h1 className="text-4xl md:text-5xl font-extrabold drop-shadow-lg">
               Upgrade Your Skills 🚀
             </h1>
             <p className="mt-4 text-blue-100 text-lg">

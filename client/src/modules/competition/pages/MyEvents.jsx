@@ -84,6 +84,13 @@ const MyEvents = () => {
                                     {/* Event Info */}
                                     <div className="flex-1">
                                         <div className="flex items-center gap-3 mb-2">
+                                            {/* Live Indicator Dot */}
+                                            {event.status === 'live' && (
+                                                <div className="relative flex items-center justify-center">
+                                                    <span className="absolute inline-flex h-3 w-3 rounded-full bg-red-400 opacity-75 animate-ping"></span>
+                                                    <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500 shadow-lg shadow-red-500/50"></span>
+                                                </div>
+                                            )}
                                             <h3 className="text-xl font-bold text-white">{event.title}</h3>
                                             <span className={`px-2 py-0.5 text-xs font-medium rounded-full capitalize border ${getStatusColor(event.status)}`}>
                                                 {event.status}

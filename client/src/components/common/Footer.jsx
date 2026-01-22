@@ -65,7 +65,7 @@ const Footer = () => {
                 <div className="mt-12 pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
                     <p>© 2026 EduHackTech Inc. All rights reserved.</p>
                     <p className="flex items-center gap-1">
-                        Made with <Heart size={12} className="text-red-500 fill-red-500" /> by Jaswanth
+                        Made with <Heart size={12} className="text-red-500 fill-red-500" /> by EduHackTechTeam
                     </p>
                 </div>
             </div>
