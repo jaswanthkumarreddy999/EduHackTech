@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const User = require('../modules/auth/User');
+const User = require('../modules/auth/user.model'); // <--- UPDATED THIS LINE
 
 // 1. Protect Routes (Verify Token)
 exports.protect = async (req, res, next) => {
@@ -37,7 +37,6 @@ exports.protect = async (req, res, next) => {
 };
 
 // 2. Role Authorization (RBAC)
-// Usage: router.get('/admin', protect, authorize('admin'), adminController)
 exports.authorize = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
