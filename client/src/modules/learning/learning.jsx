@@ -1,8 +1,9 @@
+// src/modules/learning/learning.jsx
 import React, { useState, useEffect } from "react";
 import { Search, BookOpen, Star, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-/* ✅ COURSE BANNER IMAGES (CAROUSEL) */
+/* COURSE BANNER IMAGES */
 const sliderImages = [
   "https://images.unsplash.com/photo-1522202176988-66273c2fd55f",
   "https://images.unsplash.com/photo-1519389950473-47ba0277781c",
@@ -22,7 +23,6 @@ const courses = [
     level: "Beginner",
     modules: 12,
     duration: "40 hrs",
-    progress: 0,
     rating: 4.7,
     tag: "Popular",
   },
@@ -33,7 +33,6 @@ const courses = [
     level: "Advanced",
     modules: 20,
     duration: "35 hrs",
-    progress: 0,
     rating: 4.9,
     tag: "Top Rated",
   },
@@ -44,7 +43,6 @@ const courses = [
     level: "Intermediate",
     modules: 8,
     duration: "18 hrs",
-    progress: 0,
     rating: 4.6,
     tag: "New",
   },
@@ -55,7 +53,6 @@ const courses = [
     level: "Beginner",
     modules: 10,
     duration: "15 hrs",
-    progress: 0,
     rating: 4.5,
     tag: "Trending",
   },
@@ -67,7 +64,6 @@ const Learning = () => {
   const [slide, setSlide] = useState(0);
   const navigate = useNavigate();
 
-  /* ===== IMAGE CAROUSEL ===== */
   useEffect(() => {
     const timer = setInterval(() => {
       setSlide((prev) => (prev + 1) % sliderImages.length);
@@ -75,7 +71,6 @@ const Learning = () => {
     return () => clearInterval(timer);
   }, []);
 
-  /* ===== ANIMATED PLACEHOLDER ===== */
   const placeholders = [
     "Search Full Stack...",
     "Search DSA Courses...",
@@ -114,37 +109,31 @@ const Learning = () => {
 
   return (
     <div className="bg-slate-50 min-h-screen">
-      {/* ===== HERO WITH IMAGE CAROUSEL ===== */}
+      {/* HERO */}
       <section className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
         <div className="max-w-7xl mx-auto px-6 py-14 grid md:grid-cols-2 gap-10 items-center">
-          {/* TEXT SIDE */}
           <div>
             <h1 className="text-4xl md:text-5xl font-extrabold">
               Upgrade Your Skills 🚀
             </h1>
             <p className="mt-4 text-blue-100 text-lg">
-              Learn industry‑ready skills and compete in real hackathons.
+              Learn industry‑ready skills with real projects & mentorship.
             </p>
 
-            {/* ✅ ANIMATED SEARCH BAR */}
             <div className="mt-6 relative max-w-md">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={typedText}
-                className="w-full pl-12 pr-4 py-3 rounded-full 
-                bg-white/90 backdrop-blur 
-                text-gray-800 placeholder-gray-500
-                outline-none border border-white/40
-                shadow-lg
-                focus:ring-4 focus:ring-blue-300/40
-                transition-all duration-300"
+                className="w-full pl-12 pr-4 py-3 rounded-full bg-white/90 backdrop-blur
+                text-gray-800 placeholder-gray-500 outline-none border border-white/40
+                shadow-lg focus:ring-4 focus:ring-blue-300/40 transition-all"
               />
             </div>
           </div>
 
-          {/* IMAGE CAROUSEL */}
+          {/* CAROUSEL */}
           <div className="relative overflow-hidden rounded-2xl shadow-2xl h-[260px]">
             <div
               className="flex h-full transition-transform duration-700"
@@ -154,12 +143,10 @@ const Learning = () => {
                 <img
                   key={i}
                   src={img}
-                  alt="course"
                   className="min-w-full h-full object-cover"
                 />
               ))}
             </div>
-
             <div className="absolute inset-0 bg-black/30" />
             <div className="absolute bottom-4 left-4 text-sm font-semibold">
               Featured Learning Tracks
@@ -168,7 +155,7 @@ const Learning = () => {
         </div>
       </section>
 
-      {/* ===== CATEGORY FILTER ===== */}
+      {/* CATEGORY */}
       <section className="max-w-7xl mx-auto px-6 py-10">
         <div className="flex flex-wrap gap-4 justify-center">
           {categories.map((cat) => (
@@ -187,9 +174,9 @@ const Learning = () => {
         </div>
       </section>
 
-      {/* ===== COURSE GRID ===== */}
+      {/* COURSES */}
       <section className="max-w-7xl mx-auto px-6 pb-20">
-        <h2 className="text-2xl font-bold mb-8">Recommended Courses</h2>
+        <h2 className="text-2xl font-bold mb-8">Available Courses</h2>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {filtered.map((c) => (
@@ -211,18 +198,16 @@ const Learning = () => {
 
               <div className="flex justify-between text-sm text-gray-500 mt-2">
                 <span className="flex items-center gap-1">
-                  <Clock className="w-4 h-4" />
-                  {c.duration}
+                  <Clock className="w-4 h-4" /> {c.duration}
                 </span>
                 <span className="flex items-center gap-1 text-yellow-500">
-                  <Star className="w-4 h-4 fill-yellow-400" />
-                  {c.rating}
+                  <Star className="w-4 h-4 fill-yellow-400" /> {c.rating}
                 </span>
               </div>
 
               <button
                 onClick={() => navigate(`/course/${c.id}`)}
-                className="mt-5 w-full py-2 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition font-semibold"
+                className="mt-5 w-full py-2 rounded-full bg-blue-600 text-white hover:bg-blue-700 font-semibold"
               >
                 Enroll Now
               </button>

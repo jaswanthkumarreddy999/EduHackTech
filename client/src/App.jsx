@@ -9,7 +9,8 @@ import Navbar from "./components/common/Navbar";
 import LandingPage from "./modules/landing/LandingPage";
 import Login from "./modules/auth/pages/Login";
 import Learning from "./modules/learning/learning";
-import CoursePage from "./modules/learning/coursepage"; // ✅ already imported
+import CoursePage from "./modules/learning/coursepage";
+import Payment from "./modules/learning/payment";
 
 // Wrapper to hide Navbar on Login page
 const Layout = ({ children }) => {
@@ -31,14 +32,23 @@ function App() {
         <BrowserRouter>
           <Layout>
             <Routes>
+              {/* HOME -> Learning */}
               <Route path="/" element={<Learning />} />
+
+              {/* Learning Page */}
+              <Route path="/learning" element={<Learning />} />
+
+              {/* Login */}
               <Route path="/login" element={<Login />} />
 
-              {/* Old Landing (Optional) */}
+              {/* Optional Landing */}
               <Route path="/landing" element={<LandingPage />} />
 
-              {/* ✅ Course Detail Page */}
+              {/* Course Detail Page */}
               <Route path="/course/:id" element={<CoursePage />} />
+
+              {/* ✅ Payment Page (REQUIRES ID) */}
+              <Route path="/payment/:id" element={<Payment />} />
             </Routes>
           </Layout>
         </BrowserRouter>

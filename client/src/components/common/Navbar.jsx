@@ -10,7 +10,7 @@ import {
   User,
   LayoutDashboard,
   Settings,
-  ChevronDown
+  ChevronDown,
 } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
@@ -64,7 +64,6 @@ const Navbar = () => {
     <nav className="w-full sticky top-0 z-50 backdrop-blur-lg bg-white/80 border-b border-gray-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6">
         <div className="flex items-center h-16 justify-between">
-
           {/* LEFT — Logo */}
           <div className="flex items-center min-w-fit">
             <Link
@@ -102,7 +101,6 @@ const Navbar = () => {
 
           {/* RIGHT — Actions */}
           <div className="flex items-center gap-3 sm:gap-4 min-w-fit">
-
             {/* Mode Toggle */}
             <button
               onClick={handleModeToggle}
@@ -111,14 +109,18 @@ const Navbar = () => {
               {mode === "learning" ? (
                 <>
                   <MonitorPlay className={`h-4 w-4 ${primary}`} />
-                  <span className={`text-sm font-semibold hidden sm:block ${primary}`}>
+                  <span
+                    className={`text-sm font-semibold hidden sm:block ${primary}`}
+                  >
                     Learning
                   </span>
                 </>
               ) : (
                 <>
                   <Trophy className={`h-4 w-4 ${primary}`} />
-                  <span className={`text-sm font-semibold hidden sm:block ${primary}`}>
+                  <span
+                    className={`text-sm font-semibold hidden sm:block ${primary}`}
+                  >
                     Compete
                   </span>
                 </>
@@ -143,28 +145,43 @@ const Navbar = () => {
                     {getInitials(user.name)}
                   </div>
                   {/* Chevron for visual cue */}
-                  <ChevronDown size={14} className={`text-gray-400 transition-transform duration-200 hidden sm:block ${isProfileOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown
+                    size={14}
+                    className={`text-gray-400 transition-transform duration-200 hidden sm:block ${isProfileOpen ? "rotate-180" : ""}`}
+                  />
                 </button>
 
                 {/* Dropdown Menu */}
                 {isProfileOpen && (
                   <div className="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] border border-gray-100 py-2 animate-in fade-in slide-in-from-top-2 origin-top-right">
-
                     {/* Header */}
                     <div className="px-4 py-3 border-b border-gray-50 mb-1">
-                      <p className="text-sm font-bold text-gray-900 truncate">{user.name}</p>
-                      <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                      <p className="text-sm font-bold text-gray-900 truncate">
+                        {user.name}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">
+                        {user.email}
+                      </p>
                     </div>
 
                     {/* Menu Items */}
                     <div className="px-2 space-y-1">
-                      <Link to="/dashboard" className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 hover:text-blue-600 transition-colors">
+                      <Link
+                        to="/dashboard"
+                        className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 hover:text-blue-600 transition-colors"
+                      >
                         <LayoutDashboard size={16} /> Dashboard
                       </Link>
-                      <Link to="/profile" className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 hover:text-blue-600 transition-colors">
+                      <Link
+                        to="/profile"
+                        className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 hover:text-blue-600 transition-colors"
+                      >
                         <User size={16} /> My Profile
                       </Link>
-                      <Link to="/settings" className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 hover:text-blue-600 transition-colors">
+                      <Link
+                        to="/settings"
+                        className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 hover:text-blue-600 transition-colors"
+                      >
                         <Settings size={16} /> Settings
                       </Link>
                     </div>
@@ -176,7 +193,7 @@ const Navbar = () => {
                         onClick={handleLogout}
                         className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-600 rounded-lg hover:bg-red-50 transition-colors text-left font-medium"
                       >
-                        <LogOut size={16} /> Sign Out
+                        <LogOut size={16} /> Log Out
                       </button>
                     </div>
                   </div>
@@ -191,7 +208,6 @@ const Navbar = () => {
                 Login
               </Link>
             )}
-
           </div>
         </div>
       </div>
