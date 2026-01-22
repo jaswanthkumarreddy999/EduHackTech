@@ -10,6 +10,7 @@ import LandingPage from "./modules/landing/LandingPage";
 import Login from "./modules/auth/pages/Login";
 import Learning from "./modules/learning/learning";
 import CoursePage from "./modules/learning/coursepage";
+import Payment from "./modules/learning/payment";
 import HackathonList from "./modules/competition/pages/HackathonList";
 
 // Wrapper to hide Navbar on Login page
@@ -49,6 +50,9 @@ function App() {
 
               {/* Course Detail */}
               <Route path="/course/:id" element={<CoursePage />} />
+
+              {/* ✅ Payment Page (REQUIRES ID) */}
+              <Route path="/payment/:id" element={<Payment />} />
             </Routes>
           </Layout>
         </BrowserRouter>
