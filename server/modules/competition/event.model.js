@@ -60,6 +60,10 @@ const eventSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    registrationFee: {
+        type: Number,
+        default: 0 // 0 means free event
+    },
     registeredTeams: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Team'

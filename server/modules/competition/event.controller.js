@@ -156,3 +156,188 @@ exports.getEventRegistrations = async (req, res) => {
     }
 };
 
+// @desc    Check if current user is registered for event
+// @route   GET /api/events/:id/check-registration
+// @access  Private
+exports.checkUserRegistration = async (req, res) => {
+    try {
+        const registration = await Registration.findOne({
+            event: req.params.id,
+            user: req.user.id
+        });
+        res.status(200).json({
+            success: true,
+            isRegistered: !!registration,
+            registration: registration || null
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Check failed', error: error.message });
+    }
+};
+
+// @desc    Delete/Cancel a registration (Admin/Organizer)
+// @route   DELETE /api/events/:id/registrations/:regId
+// @access  Private (Admin/Organizer)
+exports.deleteRegistration = async (req, res) => {
+    try {
+        const event = await Event.findById(req.params.id);
+        if (!event) return res.status(404).json({ success: false, message: 'Event not found' });
+
+        // Check auth - only admin or event creator can delete registrations
+        if (event.createdBy.toString() !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ success: false, message: 'Not authorized' });
+        }
+
+        const registration = await Registration.findById(req.params.regId);
+        if (!registration) {
+            return res.status(404).json({ success: false, message: 'Registration not found' });
+        }
+
+        await registration.deleteOne();
+
+        // Decrement participant count
+        if (event.participantCount > 0) {
+            event.participantCount -= 1;
+            await event.save();
+        }
+
+        res.status(200).json({ success: true, message: 'Registration cancelled' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Delete failed', error: error.message });
+    }
+};
+
+// @desc    Get events created by current user (Organizer)
+// @route   GET /api/events/my-events
+// @access  Private
+exports.getMyEvents = async (req, res) => {
+    try {
+        const events = await Event.find({ createdBy: req.user.id })
+            .sort({ createdAt: -1 });
+
+        // Get registration counts for each event
+        const eventsWithStats = await Promise.all(events.map(async (event) => {
+            const registrations = await Registration.find({ event: event._id });
+            const pendingCount = registrations.filter(r => r.status === 'pending').length;
+            const approvedCount = registrations.filter(r => r.status === 'approved').length;
+            const rejectedCount = registrations.filter(r => r.status === 'rejected').length;
+
+            return {
+                ...event.toObject(),
+                stats: {
+                    totalRegistrations: registrations.length,
+                    pending: pendingCount,
+                    approved: approvedCount,
+                    rejected: rejectedCount
+                }
+            };
+        }));
+
+        res.status(200).json({ success: true, count: eventsWithStats.length, data: eventsWithStats });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+    }
+};
+
+// @desc    Update registration status (Organizer/Admin)
+// @route   PUT /api/events/:id/registrations/:regId/status
+// @access  Private (Organizer/Admin)
+exports.updateRegistrationStatus = async (req, res) => {
+    try {
+        const { status } = req.body;
+
+        if (!['pending', 'approved', 'rejected'].includes(status)) {
+            return res.status(400).json({ success: false, message: 'Invalid status. Use: pending, approved, or rejected' });
+        }
+
+        const event = await Event.findById(req.params.id);
+        if (!event) return res.status(404).json({ success: false, message: 'Event not found' });
+
+        // Check auth - only admin or event creator can update registration status
+        if (event.createdBy.toString() !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ success: false, message: 'Not authorized' });
+        }
+
+        const registration = await Registration.findById(req.params.regId);
+        if (!registration) {
+            return res.status(404).json({ success: false, message: 'Registration not found' });
+        }
+
+        registration.status = status;
+        await registration.save();
+
+        res.status(200).json({ success: true, data: registration });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Update failed', error: error.message });
+    }
+};
+
+// @desc    Get current user's event registrations
+// @route   GET /api/events/my-registrations
+// @access  Private
+exports.getMyRegistrations = async (req, res) => {
+    try {
+        const registrations = await Registration.find({ user: req.user.id })
+            .populate('event', 'title thumbnail startDate endDate status prizePool venue registrationFee')
+            .sort({ registeredAt: -1 });
+
+        res.status(200).json({ success: true, count: registrations.length, data: registrations });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Failed to fetch registrations', error: error.message });
+    }
+};
+
+// @desc    User unregisters from an event
+// @route   DELETE /api/events/:id/unregister
+// @access  Private
+exports.unregisterFromEvent = async (req, res) => {
+    try {
+        const registration = await Registration.findOneAndDelete({
+            event: req.params.id,
+            user: req.user.id
+        });
+
+        if (!registration) {
+            return res.status(404).json({ success: false, message: 'Registration not found' });
+        }
+
+        // Decrement participant count
+        const event = await Event.findById(req.params.id);
+        if (event && event.participantCount > 0) {
+            event.participantCount -= 1;
+            await event.save();
+        }
+
+        res.status(200).json({ success: true, message: 'Successfully unregistered from event' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Unregister failed', error: error.message });
+    }
+};
+
+// @desc    User updates their registration (team name)
+// @route   PUT /api/events/:id/my-registration
+// @access  Private
+exports.updateMyRegistration = async (req, res) => {
+    try {
+        const { teamName } = req.body;
+
+        const registration = await Registration.findOne({
+            event: req.params.id,
+            user: req.user.id
+        });
+
+        if (!registration) {
+            return res.status(404).json({ success: false, message: 'Registration not found' });
+        }
+
+        if (teamName !== undefined) {
+            registration.teamName = teamName;
+        }
+
+        await registration.save();
+
+        res.status(200).json({ success: true, data: registration });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Update failed', error: error.message });
+    }
+};

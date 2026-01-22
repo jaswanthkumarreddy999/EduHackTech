@@ -75,3 +75,35 @@ export const getAdminEvents = async (token) => {
     const response = await get(`${BASE_URL}/admin/all`, token);
     return response.data;
 };
+
+/**
+ * Check if user is registered for event
+ */
+export const checkUserRegistration = async (id, token) => {
+    const response = await get(`${BASE_URL}/${id}/check-registration`, token);
+    return response;
+};
+
+/**
+ * Delete/Cancel a registration (Admin/Organizer)
+ */
+export const deleteRegistration = async (eventId, regId, token) => {
+    await del(`${BASE_URL}/${eventId}/registrations/${regId}`, token);
+    return true;
+};
+
+/**
+ * Get events created by current user (Organizer)
+ */
+export const getMyEvents = async (token) => {
+    const response = await get(`${BASE_URL}/my-events`, token);
+    return response.data;
+};
+
+/**
+ * Update registration status (Organizer/Admin)
+ */
+export const updateRegistrationStatus = async (eventId, regId, status, token) => {
+    const response = await put(`${BASE_URL}/${eventId}/registrations/${regId}/status`, { status }, token);
+    return response.data;
+};

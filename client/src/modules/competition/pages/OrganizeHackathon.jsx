@@ -94,6 +94,17 @@ const OrganizeHackathon = () => {
                                 />
                             </div>
                             <div>
+                                <label className="block text-sm font-medium text-gray-400 mb-1">Rules & Guidelines</label>
+                                <textarea
+                                    name="rules"
+                                    rows={4}
+                                    value={formData.rules || ''}
+                                    onChange={handleChange}
+                                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                                    placeholder="Code of conduct, submission guidelines, restrictions..."
+                                />
+                            </div>
+                            <div>
                                 <label className="block text-sm font-medium text-gray-400 mb-1">Banner URL</label>
                                 <div className="relative">
                                     <ImageIcon className="absolute left-3 top-3.5 text-gray-500" size={18} />

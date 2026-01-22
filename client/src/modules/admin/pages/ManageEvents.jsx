@@ -15,7 +15,8 @@ const ManageEvents = () => {
     const [editingEvent, setEditingEvent] = useState(null);
     const [formData, setFormData] = useState({
         title: '', description: '', startDate: '', endDate: '', prizePool: '$0',
-        venue: 'Online', organizer: 'EduHackTech', status: 'draft', maxTeams: 100, tags: '', thumbnail: ''
+        venue: 'Online', organizer: 'EduHackTech', status: 'draft', maxTeams: 100, tags: '', thumbnail: '',
+        registrationFee: 0, rules: ''
     });
 
     // Fetch events
@@ -47,11 +48,12 @@ const ManageEvents = () => {
                 title: event.title, description: event.description,
                 startDate: event.startDate?.split('T')[0] || '', endDate: event.endDate?.split('T')[0] || '',
                 prizePool: event.prizePool, venue: event.venue, organizer: event.organizer,
-                status: event.status, maxTeams: event.maxTeams, tags: event.tags?.join(', ') || '', thumbnail: event.thumbnail || ''
+                status: event.status, maxTeams: event.maxTeams, tags: event.tags?.join(', ') || '', thumbnail: event.thumbnail || '',
+                registrationFee: event.registrationFee || 0, rules: event.rules || ''
             });
         } else {
             setEditingEvent(null);
-            setFormData({ title: '', description: '', startDate: '', endDate: '', prizePool: '$0', venue: 'Online', organizer: 'EduHackTech', status: 'draft', maxTeams: 100, tags: '', thumbnail: '' });
+            setFormData({ title: '', description: '', startDate: '', endDate: '', prizePool: '$0', venue: 'Online', organizer: 'EduHackTech', status: 'draft', maxTeams: 100, tags: '', thumbnail: '', registrationFee: 0, rules: '' });
         }
         setIsModalOpen(true);
     };
@@ -123,6 +125,26 @@ const ManageEvents = () => {
         }
     };
 
+    const cancelRegistration = async (regId) => {
+        if (!window.confirm('Are you sure you want to cancel this registration?')) return;
+        try {
+            const res = await fetch(`${API_BASE}/${viewingRegistrations}/registrations/${regId}`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (data.success) {
+                // Refresh registrations
+                fetchRegistrations(viewingRegistrations);
+                alert('Registration cancelled successfully');
+            } else {
+                alert(data.message || 'Failed to cancel registration');
+            }
+        } catch (err) {
+            alert('Failed to cancel registration');
+        }
+    };
+
     return (
         <div className="min-h-screen bg-[#0a0a0f] text-slate-100">
             <AdminSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
@@ -157,6 +179,7 @@ const ManageEvents = () => {
                                     <th className="px-6 py-4">Title</th>
                                     <th className="px-6 py-4">Dates</th>
                                     <th className="px-6 py-4">Prize</th>
+                                    <th className="px-6 py-4">Entry Fee</th>
                                     <th className="px-6 py-4">Status</th>
                                     <th className="px-6 py-4 text-right">Actions</th>
                                 </tr>
@@ -172,6 +195,13 @@ const ManageEvents = () => {
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 text-emerald-400 font-semibold">{event.prizePool}</td>
+                                        <td className="px-6 py-4">
+                                            {event.registrationFee > 0 ? (
+                                                <span className="text-yellow-400 font-semibold">₹{event.registrationFee}</span>
+                                            ) : (
+                                                <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded-full">FREE</span>
+                                            )}
+                                        </td>
                                         <td className="px-6 py-4">
                                             <span className={`px-2 py-1 text-xs rounded-full capitalize ${getStatusColor(event.status)}`}>{event.status}</span>
                                         </td>
@@ -243,14 +273,25 @@ const ManageEvents = () => {
                                 <label className="block text-sm font-medium text-slate-400 mb-2">Tags (comma separated)</label>
                                 <input name="tags" value={formData.tags} onChange={handleChange} placeholder="AI, Blockchain, Healthcare" className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500" />
                             </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-400 mb-2">Registration Fee (₹)</label>
+                                    <input name="registrationFee" type="number" min="0" value={formData.registrationFee} onChange={handleChange} placeholder="0 for free" className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500" />
+                                    <p className="text-xs text-slate-500 mt-1">Set to 0 for free events</p>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-400 mb-2">Status</label>
+                                    <select name="status" value={formData.status} onChange={handleChange} className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500">
+                                        <option value="draft">Draft</option>
+                                        <option value="upcoming">Upcoming</option>
+                                        <option value="live">Live</option>
+                                        <option value="past">Past</option>
+                                    </select>
+                                </div>
+                            </div>
                             <div>
-                                <label className="block text-sm font-medium text-slate-400 mb-2">Status</label>
-                                <select name="status" value={formData.status} onChange={handleChange} className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500">
-                                    <option value="draft">Draft</option>
-                                    <option value="upcoming">Upcoming</option>
-                                    <option value="live">Live</option>
-                                    <option value="past">Past</option>
-                                </select>
+                                <label className="block text-sm font-medium text-slate-400 mb-2">Rules & Guidelines</label>
+                                <textarea name="rules" value={formData.rules} onChange={handleChange} rows={4} placeholder="Code of conduct, submission guidelines, restrictions..." className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500" />
                             </div>
                             <div className="flex justify-end gap-3 pt-4">
                                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 border border-slate-700 text-slate-300 rounded-xl hover:bg-slate-800 transition">Cancel</button>
@@ -283,7 +324,15 @@ const ManageEvents = () => {
                                                 <p className="text-sm text-slate-400">User: {reg.user?.name || 'Unknown'} ({reg.user?.email})</p>
                                                 <p className="text-xs text-slate-500">Registered: {new Date(reg.registeredAt).toLocaleDateString()}</p>
                                             </div>
-                                            <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded-full uppercase">{reg.status}</span>
+                                            <div className="flex items-center gap-3">
+                                                <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded-full uppercase">{reg.status}</span>
+                                                <button
+                                                    onClick={() => cancelRegistration(reg._id)}
+                                                    className="px-3 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 text-xs rounded-lg transition"
+                                                >
+                                                    Cancel
+                                                </button>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>

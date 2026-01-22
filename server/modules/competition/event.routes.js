@@ -9,11 +9,22 @@ const {
     updateEvent,
     deleteEvent,
     registerForEvent,
-    getEventRegistrations
+    getEventRegistrations,
+    checkUserRegistration,
+    deleteRegistration,
+    getMyEvents,
+    updateRegistrationStatus,
+    getMyRegistrations,
+    unregisterFromEvent,
+    updateMyRegistration
 } = require('./event.controller');
 
 // Public Routes
 router.get('/', getEvents);
+
+// Protected Routes
+router.get('/my-events', protect, getMyEvents); // Get organizer's events
+router.get('/my-registrations', protect, getMyRegistrations); // Get user's event registrations
 router.get('/:id', getEvent);
 
 // Protected Routes (User/Organizer)
@@ -21,7 +32,12 @@ router.post('/', protect, createEvent); // Create Event (Organizer)
 router.put('/:id', protect, updateEvent); // Update (Organizer/Admin)
 router.delete('/:id', protect, deleteEvent); // Delete (Organizer/Admin)
 router.post('/:id/register', protect, registerForEvent); // Register (User)
+router.delete('/:id/unregister', protect, unregisterFromEvent); // Unregister from event
+router.put('/:id/my-registration', protect, updateMyRegistration); // Update user's registration
+router.get('/:id/check-registration', protect, checkUserRegistration); // Check if user is registered
 router.get('/:id/registrations', protect, getEventRegistrations); // View Registrations (Organizer/Admin)
+router.delete('/:id/registrations/:regId', protect, deleteRegistration); // Cancel Registration (Admin/Organizer)
+router.put('/:id/registrations/:regId/status', protect, updateRegistrationStatus); // Update registration status
 
 // Admin Routes (Specific God Mode lists if needed, but getAllEventsAdmin is specialized)
 router.get('/admin/all', protect, authorize('admin'), getAllEventsAdmin);

@@ -8,7 +8,7 @@ const jwt = require('jsonwebtoken');
 exports.sendOtp = async (req, res) => {
   try {
     const { email } = req.body;
-    
+
     // 1. Generate a random 4-digit code
     const otpCode = Math.floor(1000 + Math.random() * 9000).toString();
 
@@ -22,7 +22,7 @@ exports.sendOtp = async (req, res) => {
     console.log(`\n=============================`);
     console.log(`🔐 OTP for ${email}: ${otpCode}`);
     console.log(`=============================\n`);
-    
+
     res.json({ success: true, message: 'OTP sent to console' });
   } catch (error) {
     console.error(error);
@@ -36,7 +36,7 @@ exports.checkEmail = async (req, res) => {
   try {
     const { email } = req.body;
     const user = await User.findOne({ email });
-    res.json({ exists: !!user }); 
+    res.json({ exists: !!user });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
@@ -103,7 +103,7 @@ exports.register = async (req, res) => {
     user = await User.create({
       name,
       email,
-      password: 'OTP-AUTH-USER', 
+      password: 'OTP-AUTH-USER',
       role: 'student'
     });
 
@@ -121,6 +121,68 @@ exports.register = async (req, res) => {
       user: { id: user._id, name: user.name, email: user.email, role: user.role }
     });
 
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error', error: error.message });
+  }
+};
+
+// @desc    Get current user profile
+// @route   GET /api/auth/profile
+// @access  Private
+exports.getProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    res.json({ success: true, data: user });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error', error: error.message });
+  }
+};
+
+// @desc    Update user profile
+// @route   PUT /api/auth/profile
+// @access  Private
+exports.updateProfile = async (req, res) => {
+  try {
+    const allowedFields = [
+      'name', 'avatar', 'bio', 'headline', 'phone',
+      'location', 'professional', 'education',
+      'skills', 'interests', 'preferredLanguages',
+      'learningPreferences', 'socialLinks'
+    ];
+
+    const updates = {};
+    allowedFields.forEach(field => {
+      if (req.body[field] !== undefined) {
+        updates[field] = req.body[field];
+      }
+    });
+
+    // Check if profile is being completed for the first time
+    const currentUser = await User.findById(req.user.id);
+    if (!currentUser.profileCompletedAt) {
+      const tempUser = { ...currentUser.toObject(), ...updates };
+      const hasBasicInfo = tempUser.bio && tempUser.headline && tempUser.skills?.length > 0;
+      if (hasBasicInfo) {
+        updates.profileCompletedAt = Date.now();
+      }
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { $set: updates },
+      { new: true, runValidators: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    res.json({ success: true, data: user });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server Error', error: error.message });

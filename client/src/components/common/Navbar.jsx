@@ -11,6 +11,8 @@ import {
   LayoutDashboard,
   Settings,
   ChevronDown,
+  Calendar,
+  BookOpen,
 } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
@@ -171,6 +173,24 @@ const Navbar = () => {
                         className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 hover:text-blue-600 transition-colors"
                       >
                         <LayoutDashboard size={16} /> Dashboard
+                      </Link>
+                      <Link
+                        to="/my-events"
+                        className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 hover:text-blue-600 transition-colors"
+                      >
+                        <Calendar size={16} /> My Events
+                      </Link>
+                      <Link
+                        to="/my-courses"
+                        className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 hover:text-blue-600 transition-colors"
+                      >
+                        <BookOpen size={16} /> My Courses
+                      </Link>
+                      <Link
+                        to="/my-registrations"
+                        className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 hover:text-blue-600 transition-colors"
+                      >
+                        <Trophy size={16} /> My Registrations
                       </Link>
                       <Link
                         to="/profile"
