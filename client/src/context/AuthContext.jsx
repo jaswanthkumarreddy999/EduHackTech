@@ -1,34 +1,66 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useContext } from 'react';
+import { jwtDecode } from "jwt-decode"; // You need to install this: npm install jwt-decode
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Check if user is already logged in (from localStorage)
+  // 1. Check Session on Load (The "Persist" Logic)
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
-    if (token && storedUser) {
-      setUser(JSON.parse(storedUser));
+    const storedToken = localStorage.getItem('authToken');
+    const storedUser = localStorage.getItem('authUser');
+
+    if (storedToken && storedUser) {
+      try {
+        // SECURITY CHECK: Is the token expired?
+        const decoded = jwtDecode(storedToken);
+        const currentTime = Date.now() / 1000;
+
+        if (decoded.exp < currentTime) {
+          // Token Expired -> Force Logout
+          console.warn("Session expired. Logging out...");
+          logoutUser();
+        } else {
+          // Token Valid -> Restore Session
+          setUser(JSON.parse(storedUser));
+          // Optional: You could verify the token with the backend here for extra security
+        }
+      } catch (error) {
+        // Token invalid/corrupted -> Force Logout
+        logoutUser();
+      }
     }
+    setLoading(false);
   }, []);
 
+  // 2. Login Action
   const loginUser = (userData, token) => {
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(userData));
+    // Save to State
     setUser(userData);
+    
+    // Save to Browser Storage (Persistence)
+    localStorage.setItem('authToken', token);
+    localStorage.setItem('authUser', JSON.stringify(userData));
   };
 
+  // 3. Logout Action
   const logoutUser = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    // Clear State
     setUser(null);
+    
+    // Clear Storage
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('authUser');
+    
+    // Optional: Redirect to login if needed
+    // window.location.href = '/login'; 
   };
 
   return (
-    <AuthContext.Provider value={{ user, loginUser, logoutUser }}>
-      {children}
+    <AuthContext.Provider value={{ user, loading, loginUser, logoutUser }}>
+      {!loading && children}
     </AuthContext.Provider>
   );
 };

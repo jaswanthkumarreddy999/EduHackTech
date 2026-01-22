@@ -1,40 +1,32 @@
 // src/components/common/Navbar.jsx
-import React from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Search, Bell, MonitorPlay, Trophy } from "lucide-react";
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { 
-  Search, 
-  Bell, 
-  MonitorPlay, 
-  Trophy, 
-  LogOut, 
-  User, 
-  LayoutDashboard, 
+import {
+  Search,
+  Bell,
+  MonitorPlay,
+  Trophy,
+  LogOut,
+  User,
+  LayoutDashboard,
   Settings,
-  ChevronDown 
+  ChevronDown
 } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
-import { useAuth } from "../../context/AuthContext"; // Import Auth
+import { useAuth } from "../../context/AuthContext";
 import "./Navbar.css";
-
-import logo from "../assets/EduhackTech.jpeg"; // correct path
+import logo from "../assets/EduhackTech.jpeg";
 
 const Navbar = () => {
   const { mode, toggleMode, primary, bgLight } = useTheme();
+  const { user, logoutUser } = useAuth();
   const navigate = useNavigate();
 
   const handleModeToggle = () => {
     toggleMode();
     if (mode === "learning") navigate("/competition");
     else navigate("/learning");
-import logo from "../assets/EduhackTech.jpeg";
-
-const Navbar = () => {
-  const { mode, toggleMode, primary, bgLight } = useTheme();
-  const { user, logoutUser } = useAuth(); // Get user data
-  const navigate = useNavigate();
+  };
 
   // Dropdown State
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -72,7 +64,7 @@ const Navbar = () => {
     <nav className="w-full sticky top-0 z-50 backdrop-blur-lg bg-white/80 border-b border-gray-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6">
         <div className="flex items-center h-16 justify-between">
-          
+
           {/* LEFT — Logo */}
           <div className="flex items-center min-w-fit">
             <Link
@@ -110,12 +102,10 @@ const Navbar = () => {
 
           {/* RIGHT — Actions */}
           <div className="flex items-center gap-3 sm:gap-4 min-w-fit">
-            
+
             {/* Mode Toggle */}
             <button
               onClick={handleModeToggle}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all duration-300 ${bgLight} border-gray-200 hover:shadow-md`}
-              onClick={toggleMode}
               className={`flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border transition-all duration-300 ${bgLight} border-gray-200 hover:shadow-md active:scale-95`}
             >
               {mode === "learning" ? (
@@ -159,7 +149,7 @@ const Navbar = () => {
                 {/* Dropdown Menu */}
                 {isProfileOpen && (
                   <div className="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] border border-gray-100 py-2 animate-in fade-in slide-in-from-top-2 origin-top-right">
-                    
+
                     {/* Header */}
                     <div className="px-4 py-3 border-b border-gray-50 mb-1">
                       <p className="text-sm font-bold text-gray-900 truncate">{user.name}</p>
@@ -180,7 +170,7 @@ const Navbar = () => {
                     </div>
 
                     <div className="h-px bg-gray-100 my-2 mx-2"></div>
-                    
+
                     <div className="px-2">
                       <button
                         onClick={handleLogout}

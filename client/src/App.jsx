@@ -31,11 +31,11 @@ function App() {
         <BrowserRouter>
           <Layout>
             <Routes>
-              <Route path="/" element={<LandingPage />} />
+              <Route path="/" element={<Learning />} />
               <Route path="/login" element={<Login />} />
 
-              {/* Learning */}
-              <Route path="/learning" element={<Learning />} />
+              {/* Old Landing (Optional) */}
+              <Route path="/landing" element={<LandingPage />} />
 
               {/* ✅ Course Detail Page */}
               <Route path="/course/:id" element={<CoursePage />} />
