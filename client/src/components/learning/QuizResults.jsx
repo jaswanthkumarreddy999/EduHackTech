@@ -1,8 +1,8 @@
 import React from 'react';
-import { CheckCircle, XCircle, Trophy, Clock, Target, ArrowRight, RotateCcw } from 'lucide-react';
+import { CheckCircle, XCircle, Trophy, Clock, Target, ArrowRight, RotateCcw, Hash } from 'lucide-react';
 
 const QuizResults = ({ result, questions, onRetry, onContinue }) => {
-    const { score, totalPoints, percentage, passed, timeTaken, answers } = result;
+    const { score, totalPoints, percentage, passed, timeTaken, answers, attemptNumber } = result;
 
     const formatTime = (seconds) => {
         const mins = Math.floor(seconds / 60);
@@ -19,8 +19,8 @@ const QuizResults = ({ result, questions, onRetry, onContinue }) => {
             <div className="max-w-3xl mx-auto px-6">
                 {/* Result Card */}
                 <div className={`rounded-3xl p-8 mb-8 ${passed
-                        ? 'bg-gradient-to-br from-green-600/20 to-emerald-600/20 border border-green-500/30'
-                        : 'bg-gradient-to-br from-red-600/20 to-rose-600/20 border border-red-500/30'
+                    ? 'bg-gradient-to-br from-green-600/20 to-emerald-600/20 border border-green-500/30'
+                    : 'bg-gradient-to-br from-red-600/20 to-rose-600/20 border border-red-500/30'
                     }`}>
                     <div className="text-center">
                         <div className={`w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center ${passed ? 'bg-green-500' : 'bg-red-500'
@@ -36,7 +36,7 @@ const QuizResults = ({ result, questions, onRetry, onContinue }) => {
                     </div>
 
                     {/* Stats */}
-                    <div className="grid grid-cols-3 gap-4 mt-8">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
                         <div className="bg-white/5 rounded-xl p-4 text-center">
                             <Target className="mx-auto mb-2 text-blue-400" size={24} />
                             <p className="text-3xl font-bold">{percentage}%</p>
@@ -51,6 +51,11 @@ const QuizResults = ({ result, questions, onRetry, onContinue }) => {
                             <Clock className="mx-auto mb-2 text-purple-400" size={24} />
                             <p className="text-3xl font-bold">{formatTime(timeTaken)}</p>
                             <p className="text-sm text-slate-400">Time Taken</p>
+                        </div>
+                        <div className="bg-white/5 rounded-xl p-4 text-center">
+                            <Hash className="mx-auto mb-2 text-yellow-400" size={24} />
+                            <p className="text-3xl font-bold">{attemptNumber || 1}</p>
+                            <p className="text-sm text-slate-400">Attempt</p>
                         </div>
                     </div>
                 </div>
@@ -77,8 +82,8 @@ const QuizResults = ({ result, questions, onRetry, onContinue }) => {
                                                     Q{idx + 1}
                                                 </span>
                                                 <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${q.type === 'mcq' ? 'bg-blue-500/20 text-blue-400' :
-                                                        q.type === 'msq' ? 'bg-green-500/20 text-green-400' :
-                                                            'bg-orange-500/20 text-orange-400'
+                                                    q.type === 'msq' ? 'bg-green-500/20 text-green-400' :
+                                                        'bg-orange-500/20 text-orange-400'
                                                     }`}>
                                                     {q.type.toUpperCase()}
                                                 </span>
@@ -98,8 +103,8 @@ const QuizResults = ({ result, questions, onRetry, onContinue }) => {
 
                                                         return (
                                                             <div key={optIdx} className={`flex items-center gap-2 px-3 py-2 rounded-lg ${isCorrectAnswer ? 'bg-green-500/20 text-green-300' :
-                                                                    isUserAnswer ? 'bg-red-500/20 text-red-300' :
-                                                                        'bg-slate-700/50 text-slate-400'
+                                                                isUserAnswer ? 'bg-red-500/20 text-red-300' :
+                                                                    'bg-slate-700/50 text-slate-400'
                                                                 }`}>
                                                                 {isCorrectAnswer && <CheckCircle size={14} className="text-green-400" />}
                                                                 {isUserAnswer && !isCorrectAnswer && <XCircle size={14} className="text-red-400" />}

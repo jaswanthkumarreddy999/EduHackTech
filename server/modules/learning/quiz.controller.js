@@ -10,19 +10,13 @@ exports.submitQuiz = async (req, res) => {
         const { answers, timeTaken } = req.body;
         const userId = req.user.id;
 
-        // Check if already attempted
-        const existingAttempt = await QuizAttempt.findOne({
+        // Calculate attempt number
+        const previousAttemptsCount = await QuizAttempt.countDocuments({
             user: userId,
             lessonId: lessonId
         });
 
-        if (existingAttempt) {
-            return res.status(400).json({
-                success: false,
-                message: 'You have already attempted this quiz',
-                data: existingAttempt
-            });
-        }
+        const attemptNumber = previousAttemptsCount + 1;
 
         // Get course content and find the quiz
         const content = await CourseContent.findOne({ course: courseId });
@@ -100,7 +94,9 @@ exports.submitQuiz = async (req, res) => {
             totalPoints,
             percentage,
             passed,
-            timeTaken: timeTaken || 0
+            passed,
+            timeTaken: timeTaken || 0,
+            attemptNumber
         });
 
         res.status(201).json({
@@ -130,7 +126,7 @@ exports.getQuizResult = async (req, res) => {
         const attempt = await QuizAttempt.findOne({
             user: userId,
             lessonId
-        });
+        }).sort({ completedAt: -1 });
 
         if (!attempt) {
             return res.status(404).json({ success: false, message: 'No attempt found' });
@@ -169,7 +165,7 @@ exports.getQuiz = async (req, res) => {
         const existingAttempt = await QuizAttempt.findOne({
             user: req.user.id,
             lessonId
-        });
+        }).sort({ completedAt: -1 });
 
         // Return quiz data
         // If attempted, show correct answers and explanation

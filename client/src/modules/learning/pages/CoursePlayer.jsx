@@ -225,7 +225,7 @@ const CoursePlayer = () => {
 
                 {quizResult && !quizResult.passed && (
                     <div className="mb-6 px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400">
-                        Previous Attempt: Failed ({quizResult.percentage}%)
+                        Previous Attempt: Failed ({quizResult.percentage}%) - Attempt #{quizResult.attemptNumber || 1}
                     </div>
                 )}
 

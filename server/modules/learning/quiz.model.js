@@ -45,6 +45,10 @@ const quizAttemptSchema = new mongoose.Schema({
         type: Number, // In seconds
         default: 0
     },
+    attemptNumber: {
+        type: Number,
+        default: 1
+    },
     completedAt: {
         type: Date,
         default: Date.now
@@ -53,6 +57,6 @@ const quizAttemptSchema = new mongoose.Schema({
 
 // Index for efficient queries
 quizAttemptSchema.index({ user: 1, course: 1, lessonId: 1 });
-quizAttemptSchema.index({ user: 1, lessonId: 1 }, { unique: true }); // One attempt per user per quiz
+quizAttemptSchema.index({ user: 1, lessonId: 1 }); // Removed unique constraint to allow retries
 
 module.exports = mongoose.model('QuizAttempt', quizAttemptSchema);
