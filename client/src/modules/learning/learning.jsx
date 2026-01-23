@@ -8,7 +8,7 @@ const sliderImages = [
   "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=2070&auto=format&fit=crop", // Coding screen
   "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=2070&auto=format&fit=crop", // Modern workspace
   "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2070&auto=format&fit=crop", // Collaboration
-  "https://images.unsplash.com/photo-1531297461136-82lw4227781b?q=80&w=2067&auto=format&fit=crop", // Tech abstract
+  "https://images.unsplash.com/photo-1504639725590-34d0984388bd?q=80&w=2070&auto=format&fit=crop", // Developer working
 ];
 
 // Fallback dummy course

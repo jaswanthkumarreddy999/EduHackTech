@@ -97,7 +97,7 @@ const CoursePage = () => {
     <div className="bg-slate-50 min-h-screen">
       {/* ================= HERO ================= */}
       <section className="relative">
-        <div className="absolute inset-0 h-[360px]">
+        <div className="absolute inset-0 h-[420px]">
           {course.thumbnail ? (
             <img
               src={course.thumbnail}
@@ -255,19 +255,17 @@ const CoursePage = () => {
                         navigate(`/course/${id}/learn`);
                       }}
                       className={`w-full flex items-center justify-between p-4 rounded-xl border transition
-                        ${
-                          hasAccess
-                            ? "hover:bg-gray-50"
-                            : "opacity-60 cursor-not-allowed"
+                        ${hasAccess
+                          ? "hover:bg-gray-50"
+                          : "opacity-60 cursor-not-allowed"
                         }`}
                     >
                       <div className="flex items-center gap-4">
                         <div
                           className={`w-9 h-9 rounded-full flex items-center justify-center font-bold
-                            ${
-                              completed
-                                ? "bg-green-100 text-green-600"
-                                : "bg-blue-100 text-blue-600"
+                            ${completed
+                              ? "bg-green-100 text-green-600"
+                              : "bg-blue-100 text-blue-600"
                             }`}
                         >
                           {completed ? "✓" : i + 1}
