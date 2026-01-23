@@ -32,6 +32,7 @@ import CourseEditor from "./modules/admin/pages/CourseEditor";
 import ManageUsers from "./modules/admin/pages/ManageUsers";
 import ManageChallenges from "./modules/admin/pages/ManageChallenges";
 import CreateChallenge from "./modules/competition/pages/CreateChallenge";
+import AdminSettings from "./modules/admin/pages/AdminSettings";
 
 const Layout = ({ children }) => {
   const location = useLocation();
@@ -62,52 +63,76 @@ function App() {
 
               {/* AUTH */}
               <Route path="/login" element={<Login />} />
-              <Route path="/dashboard" element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              } />
-              <Route path="/profile" element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              } />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
 
               {/* COMPETITION */}
               <Route path="/competition" element={<HackathonList />} />
-              <Route path="/competition/organize" element={
-                <ProtectedRoute>
-                  <OrganizeHackathon />
-                </ProtectedRoute>
-              } />
+              <Route
+                path="/competition/organize"
+                element={
+                  <ProtectedRoute>
+                    <OrganizeHackathon />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/competition/:id" element={<HackathonDetail />} />
-              <Route path="/competition/:id/register" element={
-                <ProtectedRoute>
-                  <HackathonRegistration />
-                </ProtectedRoute>
-              } />
-              <Route path="/competition/:id/payment" element={
-                <ProtectedRoute>
-                  <EventPayment />
-                </ProtectedRoute>
-              } />
-              <Route path="/competition/create-challenge" element={
-                <ProtectedRoute>
-                  <CreateChallenge />
-                </ProtectedRoute>
-              } />
+              <Route
+                path="/competition/:id/register"
+                element={
+                  <ProtectedRoute>
+                    <HackathonRegistration />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/competition/:id/payment"
+                element={
+                  <ProtectedRoute>
+                    <EventPayment />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/competition/create-challenge"
+                element={
+                  <ProtectedRoute>
+                    <CreateChallenge />
+                  </ProtectedRoute>
+                }
+              />
 
               {/* ORGANIZER DASHBOARD */}
-              <Route path="/my-events" element={
-                <ProtectedRoute>
-                  <MyEvents />
-                </ProtectedRoute>
-              } />
-              <Route path="/my-events/:id/registrations" element={
-                <ProtectedRoute>
-                  <EventRegistrations />
-                </ProtectedRoute>
-              } />
+              <Route
+                path="/my-events"
+                element={
+                  <ProtectedRoute>
+                    <MyEvents />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/my-events/:id/registrations"
+                element={
+                  <ProtectedRoute>
+                    <EventRegistrations />
+                  </ProtectedRoute>
+                }
+              />
 
               {/* LANDING */}
               <Route path="/landing" element={<LandingPage />} />
@@ -116,48 +141,80 @@ function App() {
               <Route path="/course/:id" element={<CoursePage />} />
               <Route path="/course/:id/learn" element={<CoursePlayer />} />
               <Route path="/payment/:id" element={<PaymentPage />} />
-              <Route path="/my-courses" element={
-                <ProtectedRoute>
-                  <MyCourses />
-                </ProtectedRoute>
-              } />
-              <Route path="/my-registrations" element={
-                <ProtectedRoute>
-                  <MyRegistrations />
-                </ProtectedRoute>
-              } />
+              <Route
+                path="/my-courses"
+                element={
+                  <ProtectedRoute>
+                    <MyCourses />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/my-registrations"
+                element={
+                  <ProtectedRoute>
+                    <MyRegistrations />
+                  </ProtectedRoute>
+                }
+              />
 
               {/* ========== ADMIN ROUTES ========== */}
-              <Route path="/admin" element={
-                <ProtectedRoute roles={['admin']}>
-                  <AdminDashboard />
-                </ProtectedRoute>
-              } />
-              <Route path="/admin/courses" element={
-                <ProtectedRoute roles={['admin']}>
-                  <ManageCourses />
-                </ProtectedRoute>
-              } />
-              <Route path="/admin/courses/:id/editor" element={
-                <ProtectedRoute roles={['admin']}>
-                  <CourseEditor />
-                </ProtectedRoute>
-              } />
-              <Route path="/admin/events" element={
-                <ProtectedRoute roles={['admin']}>
-                  <ManageEvents />
-                </ProtectedRoute>
-              } />
-              <Route path="/admin/users" element={
-                <ProtectedRoute roles={['admin']}>
-                  <ManageUsers />
-                </ProtectedRoute>
-              } />
-              <Route path="/admin/challenges" element={
-                <ProtectedRoute roles={['admin']}>
-                  <ManageChallenges />
-                </ProtectedRoute>
-              } />
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute roles={["admin"]}>
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/courses"
+                element={
+                  <ProtectedRoute roles={["admin"]}>
+                    <ManageCourses />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/courses/:id/editor"
+                element={
+                  <ProtectedRoute roles={["admin"]}>
+                    <CourseEditor />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/events"
+                element={
+                  <ProtectedRoute roles={["admin"]}>
+                    <ManageEvents />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/users"
+                element={
+                  <ProtectedRoute roles={["admin"]}>
+                    <ManageUsers />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/challenges"
+                element={
+                  <ProtectedRoute roles={["admin"]}>
+                    <ManageChallenges />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/settings"
+                element={
+                  <ProtectedRoute roles={["admin"]}>
+                    <AdminSettings />
+                  </ProtectedRoute>
+                }
+              />
             </Routes>
           </Layout>
         </BrowserRouter>
