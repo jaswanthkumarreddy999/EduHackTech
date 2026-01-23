@@ -53,11 +53,22 @@ const HackathonList = () => {
         return () => clearInterval(interval);
     }, []);
 
-    const filteredHackathons = hackathons.filter(h => {
-        const matchesFilter = filter === 'All' || (h.status && h.status.toLowerCase() === filter.toLowerCase());
-        const matchesSearch = h.title.toLowerCase().includes(searchTerm.toLowerCase());
-        return matchesFilter && matchesSearch;
-    });
+    const filteredHackathons = hackathons
+        .filter(h => {
+            const matchesFilter = filter === 'All' || (h.status && h.status.toLowerCase() === filter.toLowerCase());
+            const matchesSearch = h.title.toLowerCase().includes(searchTerm.toLowerCase());
+            return matchesFilter && matchesSearch;
+        })
+        .sort((a, b) => {
+            if (!user || !user.interests || user.interests.length === 0) return 0;
+
+            const aMatches = a.tags ? a.tags.some(tag => user.interests.includes(tag)) : false;
+            const bMatches = b.tags ? b.tags.some(tag => user.interests.includes(tag)) : false;
+
+            if (aMatches && !bMatches) return -1;
+            if (!aMatches && bMatches) return 1;
+            return 0;
+        });
 
     return (
         <div className="min-h-screen bg-[#020617] text-slate-100 font-sans selection:bg-indigo-500/30 pb-20">
@@ -218,7 +229,13 @@ const HackathonList = () => {
 
                                     {/* Action */}
                                     <button
-                                        onClick={() => navigate(`/competition/${hackathon._id}`)}
+                                        onClick={() => {
+                                            if (!user) {
+                                                window.dispatchEvent(new CustomEvent('robot-dog-trigger-angry'));
+                                            } else {
+                                                navigate(`/competition/${hackathon._id}`);
+                                            }
+                                        }}
                                         className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-white font-semibold hover:bg-indigo-600 hover:border-indigo-600 transition-all group-hover:shadow-lg flex items-center justify-center gap-2"
                                     >
                                         View Details <ArrowRight size={16} />

@@ -33,6 +33,7 @@ import ManageUsers from "./modules/admin/pages/ManageUsers";
 import ManageChallenges from "./modules/admin/pages/ManageChallenges";
 import CreateChallenge from "./modules/competition/pages/CreateChallenge";
 import AdminSettings from "./modules/admin/pages/AdminSettings";
+import RobotPetDog from "./components/RobotPetDog/RobotPetDog";
 
 const Layout = ({ children }) => {
   const location = useLocation();
@@ -46,6 +47,7 @@ const Layout = ({ children }) => {
       {!hideNavbar && <Navbar />}
       {children}
       {!hideFooter && <Footer />}
+      <RobotPetDog />
     </>
   );
 };

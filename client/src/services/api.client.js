@@ -35,7 +35,11 @@ export const apiRequest = async (endpoint, options = {}, token = null) => {
         const data = await response.json();
 
         if (!response.ok) {
-            throw new Error(data.message || `HTTP error! status: ${response.status}`);
+            console.error("API Response Error Details:", data); // Log full details to console
+            const errorMessage = data.error
+                ? `${data.message} | Details: ${data.error}`
+                : (data.message || `HTTP error! status: ${response.status}`);
+            throw new Error(errorMessage);
         }
 
         return data;

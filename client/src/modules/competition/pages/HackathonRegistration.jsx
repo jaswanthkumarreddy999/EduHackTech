@@ -5,7 +5,7 @@ import {
     Plus, Trash2, ChevronRight, ChevronLeft, Loader2, CheckCircle,
     FileText, Code, Trophy, Calendar, Clock
 } from 'lucide-react';
-import { getEvent, registerForEvent, checkUserRegistration } from '../../../services/event.service';
+import { getEvent, registerForEvent, checkUserRegistration, resubmitProblemStatement } from '../../../services/event.service';
 import { useAuth } from '../../../context/AuthContext';
 
 const HackathonRegistration = () => {
@@ -18,6 +18,8 @@ const HackathonRegistration = () => {
     const [submitting, setSubmitting] = useState(false);
     const [step, setStep] = useState(1);
     const [error, setError] = useState('');
+    const [isResubmit, setIsResubmit] = useState(false);
+    const [existingRegistration, setExistingRegistration] = useState(null);
 
     const minSize = event?.teamSize?.min || 1;
     const maxSize = event?.teamSize?.max || 4;
@@ -52,9 +54,40 @@ const HackathonRegistration = () => {
                     try {
                         const regStatus = await checkUserRegistration(id, token);
                         if (regStatus.isRegistered) {
-                            navigate(`/competition/${id}`, {
-                                state: { alreadyRegistered: true }
-                            });
+                            const registration = regStatus.registration;
+
+                            // Check if problem statement was rejected - allow resubmission
+                            if (registration?.problemStatement?.status === 'rejected') {
+                                setIsResubmit(true);
+                                setExistingRegistration(registration);
+
+                                // Pre-fill the form with existing data
+                                setFormData({
+                                    teamName: registration.teamName || '',
+                                    locality: registration.locality || { city: '', state: '', country: 'India' },
+                                    teamMembers: registration.teamMembers || [{
+                                        name: user?.name || '',
+                                        email: user?.email || '',
+                                        phone: '',
+                                        college: '',
+                                        city: '',
+                                        role: 'leader'
+                                    }],
+                                    problemStatement: {
+                                        title: registration.problemStatement?.title || '',
+                                        description: registration.problemStatement?.description || '',
+                                        techStack: registration.problemStatement?.techStack || ''
+                                    }
+                                });
+
+                                // Jump directly to problem statement step (step 3)
+                                setStep(3);
+                            } else {
+                                // Already registered and not rejected - redirect back
+                                navigate(`/competition/${id}`, {
+                                    state: { alreadyRegistered: true }
+                                });
+                            }
                         }
                     } catch (err) {
                         console.log('Registration check:', err);
@@ -157,6 +190,11 @@ const HackathonRegistration = () => {
 
     const prevStep = () => {
         setError('');
+        // In resubmit mode, don't go back beyond step 3
+        if (isResubmit && step <= 3) {
+            navigate(`/competition/${id}`);
+            return;
+        }
         setStep(step - 1);
     };
 
@@ -165,18 +203,28 @@ const HackathonRegistration = () => {
 
         setSubmitting(true);
         try {
-            await registerForEvent(id, formData, token);
-
-            // Navigate back with success message
-            const hasFee = event?.registrationFee && event.registrationFee > 0;
-            navigate(`/competition/${id}`, {
-                state: {
-                    registrationSuccess: true,
-                    hasFee: hasFee
-                }
-            });
+            if (isResubmit) {
+                // Resubmit problem statement for rejected registration
+                await resubmitProblemStatement(id, formData.problemStatement, token);
+                navigate(`/competition/${id}`, {
+                    state: {
+                        registrationSuccess: true,
+                        message: 'Problem statement resubmitted for review!'
+                    }
+                });
+            } else {
+                // New registration
+                await registerForEvent(id, formData, token);
+                const hasFee = event?.registrationFee && event.registrationFee > 0;
+                navigate(`/competition/${id}`, {
+                    state: {
+                        registrationSuccess: true,
+                        hasFee: hasFee
+                    }
+                });
+            }
         } catch (error) {
-            setError(error.response?.data?.message || 'Registration failed. Please try again.');
+            setError(error.response?.data?.message || 'Submission failed. Please try again.');
         } finally {
             setSubmitting(false);
         }
@@ -218,8 +266,16 @@ const HackathonRegistration = () => {
 
                 <div className="bg-slate-900/80 backdrop-blur-xl rounded-3xl border border-slate-800 overflow-hidden">
                     {/* Event Header */}
-                    <div className="bg-gradient-to-r from-indigo-600 to-blue-600 p-6">
-                        <h1 className="text-2xl font-bold text-white mb-1">Register for {event.title}</h1>
+                    <div className={`bg-gradient-to-r ${isResubmit ? 'from-amber-600 to-orange-600' : 'from-indigo-600 to-blue-600'} p-6`}>
+                        <h1 className="text-2xl font-bold text-white mb-1">
+                            {isResubmit ? 'Resubmit Problem Statement' : `Register for ${event.title}`}
+                        </h1>
+                        {isResubmit && existingRegistration?.problemStatement?.adminRemarks && (
+                            <div className="bg-black/20 rounded-lg p-3 mt-3 mb-2">
+                                <p className="text-xs text-amber-200 mb-1">Admin Feedback:</p>
+                                <p className="text-sm text-white">{existingRegistration.problemStatement.adminRemarks}</p>
+                            </div>
+                        )}
                         <div className="flex flex-wrap gap-4 text-blue-100 text-sm mt-3">
                             <span className="flex items-center gap-1"><Trophy size={14} /> {event.prizePool || 'TBD'}</span>
                             <span className="flex items-center gap-1"><Calendar size={14} /> {new Date(event.startDate).toLocaleDateString()}</span>
@@ -230,21 +286,37 @@ const HackathonRegistration = () => {
 
                     {/* Progress Steps */}
                     <div className="px-6 py-4 bg-slate-800/50 border-b border-slate-700">
-                        <div className="flex items-center justify-between">
-                            {stepLabels.map((label, i) => (
-                                <div key={i} className="flex items-center">
-                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${step > i + 1 ? 'bg-green-500 text-white' :
-                                            step === i + 1 ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-400'
-                                        }`}>
-                                        {step > i + 1 ? <CheckCircle size={16} /> : i + 1}
+                        {isResubmit ? (
+                            <div className="flex items-center justify-center">
+                                <div className="flex items-center gap-2">
+                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${step === 3 ? 'bg-amber-600 text-white' : 'bg-green-500 text-white'}`}>
+                                        {step > 3 ? <CheckCircle size={16} /> : 1}
                                     </div>
-                                    <span className={`ml-2 text-sm hidden sm:block ${step === i + 1 ? 'text-white' : 'text-slate-400'}`}>
-                                        {label}
-                                    </span>
-                                    {i < stepLabels.length - 1 && <ChevronRight className="mx-2 text-slate-600" size={16} />}
+                                    <span className="text-sm text-white">Edit Problem Statement</span>
+                                    <ChevronRight className="mx-2 text-slate-600" size={16} />
+                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${step === 4 ? 'bg-amber-600 text-white' : 'bg-slate-700 text-slate-400'}`}>
+                                        2
+                                    </div>
+                                    <span className={`text-sm ${step === 4 ? 'text-white' : 'text-slate-400'}`}>Review & Submit</span>
                                 </div>
-                            ))}
-                        </div>
+                            </div>
+                        ) : (
+                            <div className="flex items-center justify-between">
+                                {stepLabels.map((label, i) => (
+                                    <div key={i} className="flex items-center">
+                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${step > i + 1 ? 'bg-green-500 text-white' :
+                                            step === i + 1 ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-400'
+                                            }`}>
+                                            {step > i + 1 ? <CheckCircle size={16} /> : i + 1}
+                                        </div>
+                                        <span className={`ml-2 text-sm hidden sm:block ${step === i + 1 ? 'text-white' : 'text-slate-400'}`}>
+                                            {label}
+                                        </span>
+                                        {i < stepLabels.length - 1 && <ChevronRight className="mx-2 text-slate-600" size={16} />}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     {/* Content */}
@@ -523,7 +595,7 @@ const HackathonRegistration = () => {
                     <div className="px-6 py-4 bg-slate-800/50 border-t border-slate-700 flex justify-between">
                         {step > 1 ? (
                             <button onClick={prevStep} className="px-4 py-2 text-slate-300 hover:text-white flex items-center gap-2">
-                                <ChevronLeft size={18} /> Back
+                                <ChevronLeft size={18} /> {isResubmit && step === 3 ? 'Cancel' : 'Back'}
                             </button>
                         ) : (
                             <button onClick={() => navigate(`/competition/${id}`)} className="px-4 py-2 text-slate-300 hover:text-white">
@@ -532,17 +604,17 @@ const HackathonRegistration = () => {
                         )}
 
                         {step < totalSteps ? (
-                            <button onClick={nextStep} className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl flex items-center gap-2">
+                            <button onClick={nextStep} className={`px-6 py-2 ${isResubmit ? 'bg-amber-600 hover:bg-amber-500' : 'bg-blue-600 hover:bg-blue-500'} text-white font-semibold rounded-xl flex items-center gap-2`}>
                                 Next <ChevronRight size={18} />
                             </button>
                         ) : (
                             <button
                                 onClick={handleSubmit}
                                 disabled={submitting}
-                                className="px-6 py-2 bg-green-600 hover:bg-green-500 text-white font-semibold rounded-xl flex items-center gap-2 disabled:opacity-50"
+                                className={`px-6 py-2 ${isResubmit ? 'bg-amber-600 hover:bg-amber-500' : 'bg-green-600 hover:bg-green-500'} text-white font-semibold rounded-xl flex items-center gap-2 disabled:opacity-50`}
                             >
                                 {submitting ? <Loader2 className="animate-spin" size={18} /> : <CheckCircle size={18} />}
-                                {submitting ? 'Submitting...' : (hasFee ? 'Submit for Review' : 'Complete Registration')}
+                                {submitting ? 'Submitting...' : (isResubmit ? 'Resubmit for Review' : (hasFee ? 'Submit for Review' : 'Complete Registration'))}
                             </button>
                         )}
                     </div>

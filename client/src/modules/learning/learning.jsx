@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Search, BookOpen, Star, Clock, Loader2 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { getCourses } from "../../services/course.service";
+import { useAuth } from "../../context/AuthContext";
 
 /* ✅ COURSE BANNER IMAGES (CAROUSEL) */
 const sliderImages = [
@@ -40,6 +41,7 @@ const mapCourseData = (course) => ({
 });
 
 const Learning = () => {
+  const { user } = useAuth();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchParams] = useSearchParams();
@@ -126,11 +128,26 @@ const Learning = () => {
     return () => clearInterval(typing);
   }, [placeholderIndex]);
 
-  const filtered = courses.filter(
-    (c) =>
-      (active === "All" || c.category === active) &&
-      c.title.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = courses
+    .filter(
+      (c) =>
+        (active === "All" || c.category === active) &&
+        c.title.toLowerCase().includes(search.toLowerCase())
+    )
+    .sort((a, b) => {
+      if (!user || !user.interests || user.interests.length === 0) return 0;
+
+      const aMatch =
+        user.interests.includes(a.category) ||
+        (a.tags && a.tags.some((tag) => user.interests.includes(tag)));
+      const bMatch =
+        user.interests.includes(b.category) ||
+        (b.tags && b.tags.some((tag) => user.interests.includes(tag)));
+
+      if (aMatch && !bMatch) return -1;
+      if (!aMatch && bMatch) return 1;
+      return 0;
+    });
 
   return (
     <div className="bg-slate-50 min-h-screen">
@@ -251,7 +268,13 @@ const Learning = () => {
             {filtered.map((c) => (
               <div
                 key={c.id}
-                onClick={() => navigate(`/course/${c.id}`)}
+                onClick={() => {
+                  if (!user) {
+                    window.dispatchEvent(new CustomEvent('robot-dog-trigger-angry'));
+                  } else {
+                    navigate(`/course/${c.id}`);
+                  }
+                }}
                 className="
                 bg-white rounded-2xl overflow-hidden
                 shadow-md cursor-pointer group
@@ -322,6 +345,14 @@ const Learning = () => {
                   )}
 
                   <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (!user) {
+                        window.dispatchEvent(new CustomEvent('robot-dog-trigger-angry'));
+                      } else {
+                        navigate(`/course/${c.id}`);
+                      }
+                    }}
                     className="
                     mt-5 w-full py-2.5 rounded-xl
                     bg-blue-600 text-white font-semibold text-sm
