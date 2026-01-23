@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Calendar, MapPin, Users, Trophy, Flag, Clock, ArrowLeft, Share2, CheckCircle, Edit, X } from 'lucide-react';
 import { getEvent, registerForEvent, updateEvent, checkUserRegistration } from '../../../services/event.service';
 import { useAuth } from '../../../context/AuthContext';
+import TeamRegistrationModal from '../../../components/competition/TeamRegistrationModal';
 
 const HackathonDetail = () => {
     const { id } = useParams();
@@ -13,7 +14,7 @@ const HackathonDetail = () => {
     const [loading, setLoading] = useState(true);
     const [registering, setRegistering] = useState(false);
     const [registered, setRegistered] = useState(false);
-    const [teamName, setTeamName] = useState('');
+    const [showRegistrationModal, setShowRegistrationModal] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [editFormData, setEditFormData] = useState({});
 
@@ -76,7 +77,8 @@ const HackathonDetail = () => {
         load();
     }, [id, user, token]);
 
-    const handleRegister = async () => {
+    // Open registration modal or redirect
+    const handleRegisterClick = () => {
         if (!user) {
             navigate('/login');
             return;
@@ -88,12 +90,18 @@ const HackathonDetail = () => {
             return;
         }
 
-        // Free event - register directly
+        // Free event - open registration modal
+        setShowRegistrationModal(true);
+    };
+
+    // Handle actual registration submission from modal
+    const handleRegisterSubmit = async (formData) => {
         setRegistering(true);
         try {
-            await registerForEvent(id, { teamName: teamName || user.name }, token);
+            await registerForEvent(id, formData, token);
             setRegistered(true);
-            alert('Successfully registered!');
+            setShowRegistrationModal(false);
+            alert('Team registered successfully!');
         } catch (error) {
             alert('Registration failed: ' + (error.response?.data?.message || error.message));
         } finally {
@@ -199,27 +207,27 @@ const HackathonDetail = () => {
                             )}
                         </div>
 
+                        {/* Team Size Info */}
+                        <div className="mb-6 p-3 bg-slate-800/50 rounded-xl border border-slate-700">
+                            <div className="flex items-center justify-center gap-2 text-sm">
+                                <Users size={16} className="text-blue-400" />
+                                <span className="text-slate-300">
+                                    Team Size: <strong className="text-white">{hackathon.teamSize?.min || 1} - {hackathon.teamSize?.max || 4}</strong> members
+                                </span>
+                            </div>
+                        </div>
+
                         {!registered ? (
                             <div className="space-y-4">
-                                <div>
-                                    <label className="text-xs text-slate-400 font-bold uppercase ml-1 block mb-2">Team Name (Optional)</label>
-                                    <input
-                                        type="text"
-                                        className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 outline-none"
-                                        placeholder="e.g. Code Ninjas"
-                                        value={teamName}
-                                        onChange={(e) => setTeamName(e.target.value)}
-                                    />
-                                </div>
                                 <button
-                                    onClick={handleRegister}
+                                    onClick={handleRegisterClick}
                                     disabled={registering}
                                     className="w-full py-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold shadow-lg shadow-blue-600/25 transition flex items-center justify-center gap-2"
                                 >
                                     {registering ? 'Processing...' : (
                                         hackathon.registrationFee && hackathon.registrationFee > 0
                                             ? `Pay ₹${hackathon.registrationFee} & Register`
-                                            : 'Register Now'
+                                            : 'Register Your Team'
                                     )}
                                 </button>
                                 <p className="text-xs text-center text-slate-400">By registering, you agree to the rules.</p>
@@ -227,19 +235,19 @@ const HackathonDetail = () => {
                         ) : (
                             <div className="bg-green-500/20 border border-green-500/50 rounded-xl p-4 text-center">
                                 <CheckCircle className="mx-auto text-green-400 mb-2" size={32} />
-                                <h4 className="font-bold text-green-100">You are registered!</h4>
-                                <p className="text-sm text-green-200/70 mt-1">Check your email for details.</p>
+                                <h4 className="font-bold text-green-100">Team Registered!</h4>
+                                <p className="text-sm text-green-200/70 mt-1">Check your notifications for details.</p>
                             </div>
                         )}
 
                         <div className="mt-8 grid grid-cols-2 gap-4 border-t border-white/10 pt-6">
                             <div className="text-center">
                                 <p className="text-2xl font-bold text-white">{hackathon.participantCount || 0}</p>
-                                <p className="text-xs text-slate-400">Participants</p>
+                                <p className="text-xs text-slate-400">Teams Registered</p>
                             </div>
                             <div className="text-center">
-                                <p className="text-2xl font-bold text-white">{hackathon.maxTeams || 'Unlim'}</p>
-                                <p className="text-xs text-slate-400">Team Limit</p>
+                                <p className="text-2xl font-bold text-white">{hackathon.maxTeams || '∞'}</p>
+                                <p className="text-xs text-slate-400">Max Teams</p>
                             </div>
                         </div>
                     </div>
@@ -318,6 +326,16 @@ const HackathonDetail = () => {
                     </div>
                 </div>
             )}
+
+            {/* Team Registration Modal */}
+            <TeamRegistrationModal
+                isOpen={showRegistrationModal}
+                onClose={() => setShowRegistrationModal(false)}
+                event={hackathon}
+                user={user}
+                onRegister={handleRegisterSubmit}
+                isLoading={registering}
+            />
         </div>
     );
 };

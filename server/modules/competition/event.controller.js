@@ -118,16 +118,78 @@ exports.registerForEvent = async (req, res) => {
         // Check if already registered
         const existing = await Registration.findOne({ event: req.params.id, user: req.user.id });
         if (existing) {
-            return res.status(400).json({ success: false, message: 'Already registered' });
+            return res.status(400).json({ success: false, message: 'Already registered for this event' });
         }
+
+        // Validate required fields
+        const { teamName, teamMembers, locality } = req.body;
+
+        if (!teamName || !teamName.trim()) {
+            return res.status(400).json({ success: false, message: 'Team name is required' });
+        }
+
+        if (!teamMembers || !Array.isArray(teamMembers) || teamMembers.length === 0) {
+            return res.status(400).json({ success: false, message: 'At least one team member is required' });
+        }
+
+        // Validate team size against event limits
+        const minSize = event.teamSize?.min || 1;
+        const maxSize = event.teamSize?.max || 10;
+
+        if (teamMembers.length < minSize) {
+            return res.status(400).json({
+                success: false,
+                message: `Team must have at least ${minSize} member${minSize > 1 ? 's' : ''}`
+            });
+        }
+
+        if (teamMembers.length > maxSize) {
+            return res.status(400).json({
+                success: false,
+                message: `Team cannot have more than ${maxSize} members`
+            });
+        }
+
+        // Validate each team member has required fields
+        for (let i = 0; i < teamMembers.length; i++) {
+            const member = teamMembers[i];
+            if (!member.name || !member.name.trim()) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Member ${i + 1}: Name is required`
+                });
+            }
+            if (!member.email || !member.email.trim()) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Member ${i + 1}: Email is required`
+                });
+            }
+            // Basic email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(member.email)) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Member ${i + 1}: Invalid email format`
+                });
+            }
+        }
+
+        // Ensure first member is marked as leader
+        const processedMembers = teamMembers.map((member, index) => ({
+            ...member,
+            role: index === 0 ? 'leader' : 'member'
+        }));
 
         const registration = await Registration.create({
             event: req.params.id,
             user: req.user.id,
-            teamName: req.body.teamName || req.user.name
+            teamName: teamName.trim(),
+            teamMembers: processedMembers,
+            locality: locality || {}
         });
 
-        // Increment count
+        // Increment participant count
         event.participantCount = (event.participantCount || 0) + 1;
         await event.save();
 
@@ -137,16 +199,16 @@ exports.registerForEvent = async (req, res) => {
                 req.user.id,
                 'success',
                 'Registration Confirmed! 🎯',
-                `You're registered for "${event.title}". Good luck!`,
+                `Team "${teamName}" is registered for "${event.title}". Good luck!`,
                 `/event/${req.params.id}`
             );
         } catch (notifError) {
             console.error('Failed to create notification:', notifError);
-            // Don't fail the registration if notification fails
         }
 
         res.status(201).json({ success: true, data: registration });
     } catch (error) {
+        console.error('Registration error:', error);
         res.status(500).json({ success: false, message: 'Registration failed', error: error.message });
     }
 };
