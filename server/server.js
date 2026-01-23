@@ -3,72 +3,57 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
-const connectDB = require('./config/db'); // Import DB Config
+const mongoose = require('mongoose');
 
-// Load env vars
 dotenv.config();
-
-// Connect to Database
-connectDB();
 
 const app = express();
 
-// --- CORS CONFIGURATION ---
-const corsOptions = {
-  origin: ['https://edu-hack-tech.vercel.app', 'http://localhost:5173', 'http://localhost:3000'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
-  credentials: true,
-  optionsSuccessStatus: 200 // Important for legacy browser support and Vercel
+// --- 1. DATABASE CONNECTION (Serverless Optimized) ---
+const connectDB = async () => {
+  if (mongoose.connection.readyState >= 1) return; // Reuse existing connection
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log("✅ MongoDB Connected");
+  } catch (error) {
+    console.error("❌ MongoDB Connection Error:", error);
+  }
 };
 
-// --- MIDDLEWARES ---
-app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); // Enable pre-flight for all routes
-app.use(express.json({ limit: '50mb' })); // Body parser with increased limit for base64 images
-app.use(express.urlencoded({ extended: true, limit: '50mb' })); // URL Encoded parser with limit
-app.use(helmet());       // Security Headers
-app.use(morgan('dev'));  // Logging
+// --- 2. CORS CONFIGURATION ---
+const corsOptions = {
+  origin: ['https://edu-hack-tech.vercel.app', 'http://localhost:5173'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+};
 
-// --- ROUTES ---
-// Health check / root route
+// --- 3. MIDDLEWARES ---
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // Pre-flight
+app.use(express.json({ limit: '10mb' }));
+app.use(helmet());
+app.use(morgan('dev'));
+
+// --- 4. ROUTES ---
+// Health Check (Root)
 app.get('/', (req, res) => {
   res.json({ status: 'ok', message: 'EduHackTech API is running!' });
 });
 
-app.use('/api/auth', require('./modules/auth/auth.routes'));
-app.use('/api/courses', require('./modules/learning/course.routes'));
-app.use('/api/events', require('./modules/competition/event.routes'));
-app.use('/api/enrollments', require('./modules/learning/enrollment.routes'));
-app.use('/api/admin', require('./modules/admin/admin.routes'));
-app.use('/api/challenges', require('./modules/competition/challenge.routes'));
-app.use('/api/notifications', require('./modules/notification/notification.routes'));
+// Important: Add connectDB call to your routes to ensure DB is ready
+app.use('/api/courses', async (req, res, next) => {
+  await connectDB();
+  next();
+}, require('./modules/learning/course.routes'));
 
-// Example of a Protected Route (For Testing)
-// We will move this to a proper module later
-const { protect, authorize } = require('./middlewares/authMiddleware');
+// ... Add other routes similarly (api/auth, api/events, etc.)
 
-app.get('/api/test/admin', protect, authorize('admin'), (req, res) => {
-  res.send('If you see this, you are an Admin!');
-});
-
-app.get('/api/test/student', protect, (req, res) => {
-  res.send(`Hello Student ${req.user.name}, you have access!`);
-});
-
-
-// --- ERROR HANDLING ---
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: 'Server Error' });
-});
-
-const PORT = process.env.PORT || 5000;
-
-if (require.main === module) {
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-  });
+// --- 5. EXPORTS (The Vercel Way) ---
+// Vercel handles the "listen" part. Only run app.listen locally.
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => console.log(`🚀 Local Server on port ${PORT}`));
 }
 
 module.exports = app;
