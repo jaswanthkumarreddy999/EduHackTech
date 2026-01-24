@@ -16,6 +16,8 @@ const RobotPetDog = () => {
     const [isVisible, setIsVisible] = useState(false);
     const [isAngry, setIsAngry] = useState(false);
 
+    const [hasDismissedInterests, setHasDismissedInterests] = useState(false);
+
     // Chat State
     const [showChat, setShowChat] = useState(false);
     const [messages, setMessages] = useState([
@@ -72,12 +74,13 @@ const RobotPetDog = () => {
             if (!user) {
                 // For guests, always visible to remind them
                 setIsVisible(true);
-            } else if (user && (!user.interests || user.interests.length === 0)) {
+            } else if (user && (!user.interests || user.interests.length === 0) && !hasDismissedInterests) {
                 // For new users without interests, show the modal directly and keep dog visible
+                // ONLY if they haven't dismissed it
                 setIsVisible(true);
                 setShowInterests(true);
             } else {
-                // For old users, only show at the end of scroll
+                // For old users or dismissed interest modal, only show at the end of scroll
                 setIsVisible(isAtBottom || showChat); // Keep visible if chat is open
             }
         };
@@ -85,7 +88,7 @@ const RobotPetDog = () => {
         window.addEventListener('scroll', handleScroll);
         handleScroll(); // Check once on mount
         return () => window.removeEventListener('scroll', handleScroll);
-    }, [user, showChat]);
+    }, [user, showChat, hasDismissedInterests]);
 
     useEffect(() => {
         // Initial State Logic
@@ -94,7 +97,7 @@ const RobotPetDog = () => {
                 setDialogueText("Woof! You look new here! Why not log in or register to join the fun?");
                 setShowDialogue(true);
             }
-        } else if (user && (!user.interests || user.interests.length === 0)) {
+        } else if (user && (!user.interests || user.interests.length === 0) && !hasDismissedInterests) {
             setDialogueText("Woof woof! I want to show you the best stuff. What are you interested in? Pick 3!");
             setShowDialogue(true);
         } else {
@@ -107,12 +110,12 @@ const RobotPetDog = () => {
                 setShowDialogue(false);
             }
         }
-    }, [user, isAngry, showChat]);
+    }, [user, isAngry, showChat, hasDismissedInterests]);
 
     const handleDogClick = () => {
         if (!user) {
             window.dispatchEvent(new CustomEvent('robot-dog-trigger-angry'));
-        } else if (user && (!user.interests || user.interests.length === 0)) {
+        } else if (user && (!user.interests || user.interests.length === 0) && !hasDismissedInterests) {
             setShowInterests(true);
         } else {
             // Toggle Chat Window
@@ -151,7 +154,6 @@ const RobotPetDog = () => {
     };
 
     /* --- Chat Logic --- */
-    /* --- Chat Logic --- */
     const handleSendMessage = async (e) => {
         e.preventDefault();
         if (!inputMessage.trim()) return;
@@ -181,6 +183,9 @@ const RobotPetDog = () => {
             setIsTyping(false);
         }
     };
+
+    // Hide completely for Admin
+    if (user?.role === 'admin') return null;
 
     return (
         <div className={`pet-dog-container ${isVisible ? 'visible' : ''} ${isAngry ? 'angry-shake' : ''}`}>
@@ -229,6 +234,17 @@ const RobotPetDog = () => {
             {/* --- Interest Modal --- */}
             {showInterests && (
                 <div className="interest-modal">
+                    <button
+                        className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 transition-colors"
+                        onClick={() => {
+                            setShowInterests(false);
+                            setHasDismissedInterests(true);
+                            setDialogueText("Okay, I won't bug you now! Bark at me if you need help! 🦴");
+                            setShowDialogue(true);
+                        }}
+                    >
+                        <X size={20} />
+                    </button>
                     <h3>Pick 3 Interests 🐾</h3>
                     <div className="interest-grid">
                         {domains.map(domain => (
